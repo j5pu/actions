@@ -4,10 +4,6 @@
     <content url="file://$MODULE_DIR$" />
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module" module-name="goreleaser" />
-    <orderEntry type="module" module-name="goreleaser-action" />
-    <orderEntry type="module" module-name="svu" />
-    <orderEntry type="module" module-name="update-homebrew-action" />
   </component>
   <component name="PyDocumentationSettings">
     <option name="format" value="GOOGLE" />
