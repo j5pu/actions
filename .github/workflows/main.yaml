@@ -25,6 +25,7 @@ jobs:
               workflow_id: "main.yaml",
               ref: "main"
             });
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 #      - uses: j5pu/actions/secrets@main
 
