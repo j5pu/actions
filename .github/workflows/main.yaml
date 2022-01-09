@@ -22,9 +22,15 @@ jobs:
 #         [ ! "${TWINE_PASSWORD-}" ] || echo defined
 
       - run: |
-#          gh auth login
           gh secret list
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
-#          GITHUB_TOKEN: ${{ secrets.TOKEN }}
         shell: bash
+
+#      - run: |
+##          gh auth login
+#          gh secret list
+#        env:
+#          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+##          GITHUB_TOKEN: ${{ secrets.TOKEN }}
+#        shell: bash
