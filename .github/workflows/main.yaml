@@ -15,7 +15,18 @@ jobs:
           fetch-depth: 0
           repository: mnopi/secrets
 
-      - uses: j5pu/actions/secrets@main
+      - name: organization secrets
+        uses: actions/github-script@v5
+        with:
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: "mnopi",
+              repo: "secrets",
+              workflow_id: "main.yaml",
+              ref: "main"
+            });
+
+#      - uses: j5pu/actions/secrets@main
 
       - shell: bash
         run: |
