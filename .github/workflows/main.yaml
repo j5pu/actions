@@ -15,10 +15,9 @@ jobs:
           fetch-depth: 0
           repository: mnopi/secrets
 
+      - uses: j5pu/actions/secrets@main
+
       - shell: bash
-        env:
-          TWINE_PASSWORD: ${{ secrets.TWINE_PASSWORD }}
-          TWINE_USER: ${{ secrets.TWINE_USER }}
         run: |
            [ ! "${TWINE_PASSWORD-}" ] || echo defined
            echo ${TWINE_USER}
