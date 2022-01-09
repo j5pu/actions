@@ -22,7 +22,7 @@ jobs:
 #         [ ! "${TWINE_PASSWORD-}" ] || echo defined
 
       - run: |
-          gh auth login
+          gh auth login --with-token
           gh secret list
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
