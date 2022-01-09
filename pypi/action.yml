@@ -1,9 +1,6 @@
 name: 'Build and publish python package'
 description: 'Build and publish python package'
 
-# TODO: secrets en pre-commit o mirar lo el repo que lo pone coo env, o sea, llamarlo antes en workflow.
-# TODO: AQUI LO DEJO.
-
 inputs:
   password:
     description: 'TWINE_PASSWORD/PYPI_API_TOKEN'

@@ -1,5 +1,31 @@
 # actions
 
+## pypi
+Inputs:
+* *password* (default: true): PYPI_API_TOKEN/TWINE_PASSWORD
+* *version* (default: 3.9): python version
+
+### Examples:
+
+#### With version: 3.10
+```yaml
+name: publish
+
+on:
+  push:
+    tags:
+      - '*'
+    
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: j5pu/actions/pypi@main
+        with:
+          password: ${{ secrets.PYPI_API_TOKEN }}
+          version: 3.10
+```
+
 ## tag
 Inputs:
 * *release* (default: true): creates a release and delete older releases 
