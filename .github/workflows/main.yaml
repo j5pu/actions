@@ -8,3 +8,5 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: j5pu/actions/secrets@main
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
