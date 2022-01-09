@@ -1,15 +1,44 @@
 name: 'Build and publish python package'
 description: 'Build and publish python package'
 
+# TODO: secrets en pre-commit o mirar lo el repo que lo pone coo env, o sea, llamarlo antes en workflow.
+# TODO: AQUI LO DEJO.
+
+inputs:
+  password:
+    description: 'TWINE_PASSWORD/PYPI_API_TOKEN'
+    required: true
+
+  version:
+    description: 'python version'
+    required: false
+    default: '3.9'
+
 runs:
   using: "composite"
   steps:
     - uses: actions/checkout@v2
       with:
-        repository: j5pu/secrets
         fetch-depth: 0
-    - shell: bash
-      env:
-        TWINE_PASSWORD: ${{ secrets.TWINE_PASSWORD }}
+
+    - name: Set up Python ${{ input.version }}
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ input.version }}
+
+    - name: Install pypa/build
       run: |
-        echo "$TWINE_PASSWORD"
+        python -m pip install build --user
+      shell: bash
+
+    - name: Build a binary wheel and a source tarball
+      run: |
+        python -m build --sdist --wheel --outdir dist/ .
+      shell: bash
+
+    - name: Publish distribution 📦 to PyPI
+      # TODO: if public repo
+      if: startsWith(github.ref, 'refs/tags')
+      uses: pypa/gh-action-pypi-publish@master
+      with:
+        password: ${{ inputs.password }}
