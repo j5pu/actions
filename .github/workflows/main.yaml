@@ -15,7 +15,13 @@ jobs:
           fetch-depth: 0
           repository: mnopi/secrets
 
+#    - shell: bash
+#      env:
+#        TWINE_PASSWORD: ${{ secrets.TWINE_PASSWORD }}
+#      run: |
+#         [ ! "${TWINE_PASSWORD-}" ] || echo defined
+
       - run: gh secret list
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}
         shell: bash
