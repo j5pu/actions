@@ -92,4 +92,6 @@ runs:
       with:
         keep_latest: ${{ inputs.keep }}
         delete_tags: true
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
       if: inputs.release == 'true' && steps.VERSION.outputs.CHANGED == 'true'
