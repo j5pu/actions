@@ -56,14 +56,13 @@ name: tag
 
 on: [push, workflow_dispatch]
 
-env:
-  GITHUB_TOKEN: ${{ secrets.TOKEN }}
-
 jobs:
   tag:
     runs-on: ubuntu-latest
     steps:
       - uses: j5pu/actions/tag@main
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}
 ```
 
 #### With release: true
@@ -71,9 +70,6 @@ jobs:
 name: tag
 
 on: [push, workflow_dispatch]
-
-env:
-  GITHUB_TOKEN: ${{ secrets.TOKEN }}
 
 jobs:
   tag:
