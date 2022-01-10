@@ -1,91 +1,100 @@
-name: 'Tag with svu next'
-description: 'Tag with svu next'
+name: tag
+description: "Tag and push repository if 'svu current' != 'svu next'"
 
 inputs:
+  keep:
+    description: 'Release: keep'
+    required: false
+    default: '3'
+
   strip:
-    description: 'Strip prefix'
+    description: 'Version: strip prefix'
     required: false
     default: 'true'
 
   release:
-    description: 'Create a default release'
+    description: 'Release: create'
     required: false
     default: 'true'
 
+outputs:
+  CHANGED:
+    description: "Version: changed"
+    value: ${{ steps.VERSION.outputs.CHANGED }}
+
+  CURRENT:
+    description: "Version: current"
+    value: ${{ steps.VERSION.outputs.CURRENT }}
+
+  NEXT:
+    description: "Version: next"
+    value: ${{ steps.VERSION.outputs.NEXT }}
+
+  PREFIX:
+    description: "Version: prefix"
+    value: ${{ steps.VERSION.outputs.PREFIX }}
+
 runs:
   using: "composite"
+
   steps:
     - uses: actions/checkout@v2
       with:
         fetch-depth: 0
 
-    - name: toggle workflow command echoing
-      run: echo '::echo::on'
-      shell: bash
-
-    - name: Install svu ubuntu
+    - name: "svu: ubuntu"
       run: |
         echo 'deb [trusted=yes] https://apt.fury.io/caarlos0/ /' | \
           sudo tee /etc/apt/sources.list.d/caarlos0.list >/dev/null
         sudo apt update -qq >/dev/null
         sudo apt install -qq svu >/dev/null
+      env:
+        DEBIAN_FRONTEND: noninteractive
       if: runner.os == 'Linux'
       shell: bash
 
-    - name: Install svu macOS
+    - name: "svu: macOS"
       run: |
         brew update --quiet >/dev/null
         brew install --quiet caarlos0/tap/svu >/dev/null
       if: runner.os == 'macOS'
       shell: bash
 
-    - name: Svu version output
-      run: svu --version > /dev/null
-      shell: bash
-
-    - name: Strip prefix
-      id: strip
-      run: echo "::set-output name=prefix::--strip-prefix"
-      shell: bash
-      if: inputs.strip == 'true'
-
-    - name: Current version
-      id: current
-      run: echo "::set-output name=version::$(svu ${{ steps.strip.outputs.prefix }} current)"
-      shell: bash
-
-    - name: Next version
-      id: next
-      run: echo "::set-output name=version::$(svu ${{ steps.strip.outputs.prefix }} next)"
-      shell: bash
-
-    - name: Versions different, tag
+    - name: Version
+      id: VERSION
       run: |
-        echo "Tag: ${{ steps.current.outputs.version }} => ${{ steps.next.outputs.version }}"
-        git tag ${{ steps.next.outputs.version }}
-        git push origin ${{ steps.next.outputs.version }}
-        echo git tag ${{ steps.next.outputs.version }}
-      if: steps.current.outputs.version != steps.next.outputs.version
+        CHANGED=false
+        PREFIX='v'
+        [ ${{ inputs.strip }} != 'true' ] || { flag='--strip-prefix'; PREFIX=''; }
+        CURRENT=$(svu ${flag} current)
+        NEXT=$(svu ${flag} next)
+        [ ${CURRENT} = ${NEXT} ] || CHANGED=true
+        echo '::echo::on'
+        echo "::set-output name=CHANGED::${CHANGED}"
+        echo "::set-output name=CURRENT::${CURRENT}"
+        echo "::set-output name=NEXT::${NEXT}"
+        echo "::set-output name=PREFIX::${PREFIX}"
       shell: bash
 
-    - name: Versions equal, skipping
+    - name: "Tag & push: ${{ steps.VERSION.outputs.CURRENT }} => ${{ steps.VERSION.outputs.NEXT }}"
       run: |
-        echo "Nothing to do: ${{ steps.current.outputs.version }} => ${{ steps.next.outputs.version }}"
-      if: steps.current.outputs.version == steps.next.outputs.version
+        git tag ${{ steps.VERSION.outputs.NEXT }}
+        git push origin ${{ steps.VERSION.outputs.NEXT }}
+      if: steps.VERSION.outputs.CHANGED = 'true'
       shell: bash
 
-    - name: Create release
+    - name: "Release: create"
       id: create
       uses: softprops/action-gh-release@v1
       with:
-        tag_name: ${{ steps.next.outputs.version }}
-      if: inputs.release == 'true' && steps.current.outputs.version != steps.next.outputs.version
+        tag_name: ${{ steps.VERSION.outputs.NEXT }}
+      if: inputs.release == 'true' && steps.VERSION.outputs.CHANGED = 'true'
 
-    - name: Delete older versions
+    - name: "Release: delete"
       uses: dev-drprasad/delete-older-releases@v0.2.0
       with:
-        keep_latest: 3
+        keep_latest: ${{ inputs.keep }}
         delete_tags: true
       env:
         GITHUB_TOKEN: ${{ github.token }}
-      if: inputs.release == 'true' && steps.current.outputs.version != steps.next.outputs.version
+      if: inputs.release == 'true' && steps.VERSION.outputs.CHANGED = 'true'
