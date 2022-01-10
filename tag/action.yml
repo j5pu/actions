@@ -21,21 +21,22 @@ runs:
 
     - name: Install svu ubuntu
       run: |
-        echo 'deb [trusted=yes] https://apt.fury.io/caarlos0/ /' | sudo tee /etc/apt/sources.list.d/caarlos0.list
-        sudo apt update -qq
-        sudo apt install -qq svu
+        echo 'deb [trusted=yes] https://apt.fury.io/caarlos0/ /' | \
+          sudo tee /etc/apt/sources.list.d/caarlos0.list >/dev/null
+        sudo apt update -qq >/dev/null
+        sudo apt install -qq svu >/dev/null
       if: runner.os == 'Linux'
       shell: bash
 
     - name: Install svu macOS
       run: |
-        brew update --quiet
-        brew install --quiet caarlos0/tap/svu
+        brew update --quiet >/dev/null
+        brew install --quiet caarlos0/tap/svu >/dev/null
       if: runner.os == 'macOS'
       shell: bash
 
     - name: Svu version output
-      run: svu --version
+      run: svu --version > /dev/null
       shell: bash
 
     - name: Strip prefix
