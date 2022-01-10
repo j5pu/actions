@@ -46,8 +46,8 @@ runs:
       run: |
         echo 'deb [trusted=yes] https://apt.fury.io/caarlos0/ /' | \
           sudo tee /etc/apt/sources.list.d/caarlos0.list >/dev/null
-        sudo apt update -qq >/dev/null
-        sudo apt install -qq svu >/dev/null
+        sudo apt update -qq >/dev/null | grep -v 'WARNING: apt does'
+        sudo apt install -qq svu >/dev/null | grep -v 'WARNING: apt does'
       env:
         DEBIAN_FRONTEND: noninteractive
       if: runner.os == 'Linux'
@@ -76,7 +76,7 @@ runs:
         echo "::set-output name=PREFIX::${PREFIX}"
       shell: bash
 
-    - name: "Tag & push: ${{ steps.VERSION.outputs.CURRENT }} => ${{ steps.VERSION.outputs.NEXT }}"
+    - name: "Tag & push"
       run: |
         git tag ${{ steps.VERSION.outputs.NEXT }}
         git push origin ${{ steps.VERSION.outputs.NEXT }}
