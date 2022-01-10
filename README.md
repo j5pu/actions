@@ -17,7 +17,7 @@ on:
       - '*'
     
 jobs:
-  tag:
+  publish:
     runs-on: ubuntu-latest
     steps:
       - uses: j5pu/actions/pypi@main
