@@ -8,6 +8,10 @@ Inputs:
 ### Examples:
 
 #### With version: 3.10
+```shell
+secrets.sh
+```
+
 ```yaml
 name: publish
 
