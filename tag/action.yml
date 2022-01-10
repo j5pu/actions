@@ -80,7 +80,7 @@ runs:
       run: |
         git tag ${{ steps.VERSION.outputs.NEXT }}
         git push origin ${{ steps.VERSION.outputs.NEXT }}
-      if: steps.VERSION.outputs.CHANGED = 'true'
+      if: steps.VERSION.outputs.CHANGED == 'true'
       shell: bash
 
     - name: "Release: create"
@@ -88,7 +88,7 @@ runs:
       uses: softprops/action-gh-release@v1
       with:
         tag_name: ${{ steps.VERSION.outputs.NEXT }}
-      if: inputs.release == 'true' && steps.VERSION.outputs.CHANGED = 'true'
+      if: inputs.release == 'true' && steps.VERSION.outputs.CHANGED == 'true'
 
     - name: "Release: delete"
       uses: dev-drprasad/delete-older-releases@v0.2.0
@@ -97,4 +97,4 @@ runs:
         delete_tags: true
       env:
         GITHUB_TOKEN: ${{ github.token }}
-      if: inputs.release == 'true' && steps.VERSION.outputs.CHANGED = 'true'
+      if: inputs.release == 'true' && steps.VERSION.outputs.CHANGED == 'true'
