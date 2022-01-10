@@ -46,8 +46,8 @@ runs:
       run: |
         echo 'deb [trusted=yes] https://apt.fury.io/caarlos0/ /' | \
           sudo tee /etc/apt/sources.list.d/caarlos0.list >/dev/null
-        sudo apt update -qq >/dev/null | grep -v 'WARNING: apt does'
-        sudo apt install -qq svu >/dev/null | grep -v 'WARNING: apt does'
+        sudo apt update -qq 2>&1 | grep -v 'WARNING: apt does'
+        sudo apt install -qq svu 2>&1 | grep -v 'WARNING: apt does'
       env:
         DEBIAN_FRONTEND: noninteractive
       if: runner.os == 'Linux'
