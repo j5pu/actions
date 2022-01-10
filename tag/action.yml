@@ -16,10 +16,6 @@ inputs:
     description: 'Release: create'
     required: false
     default: 'true'
-#
-#  TOKEN:
-#    description: 'GitHub token'
-#    required: true
 
 outputs:
   CHANGED:
@@ -81,16 +77,12 @@ runs:
       run: |
         git tag ${{ steps.VERSION.outputs.NEXT }}
         git push origin ${{ steps.VERSION.outputs.NEXT }}
-#      env:
-#        GITHUB_TOKEN: ${{ inputs.TOKEN }}
       if: steps.VERSION.outputs.CHANGED == 'true'
       shell: bash
 
     - name: "Release: create"
       id: create
       uses: softprops/action-gh-release@v1
-#      env:
-#        GITHUB_TOKEN: ${{ inputs.TOKEN }}
       with:
         tag_name: ${{ steps.VERSION.outputs.NEXT }}
       if: inputs.release == 'true' && steps.VERSION.outputs.CHANGED == 'true'
@@ -100,6 +92,4 @@ runs:
       with:
         keep_latest: ${{ inputs.keep }}
         delete_tags: true
-      env:
-        GITHUB_TOKEN: ${{ github.token }}
       if: inputs.release == 'true' && steps.VERSION.outputs.CHANGED == 'true'
