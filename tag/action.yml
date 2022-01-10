@@ -19,6 +19,10 @@ runs:
       with:
         fetch-depth: 0
 
+    - name: toggle workflow command echoing
+      run: echo '::echo::on'
+      shell: bash
+
     - name: Install svu ubuntu
       run: |
         echo 'deb [trusted=yes] https://apt.fury.io/caarlos0/ /' | \
@@ -44,18 +48,6 @@ runs:
       run: echo "::set-output name=prefix::--strip-prefix"
       shell: bash
       if: inputs.strip == 'true'
-
-    - name: Input strip true, show strip prefix option
-      run: |
-        echo "Input strip: true, strip prefix option: ${{ steps.strip.outputs.prefix }}"
-      if: inputs.strip == 'true'
-      shell: bash
-
-    - name: Input strip false, show strip prefix empty option
-      run: |
-        echo "Input strip: false, strip prefix option: ${{ steps.strip.outputs.prefix }}"
-      if: inputs.strip != 'true'
-      shell: bash
 
     - name: Current version
       id: current
