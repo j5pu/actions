@@ -88,3 +88,23 @@ jobs:
       - uses: softprops/action-gh-release@v1
       - uses: garden-io/update-homebrew-action@v1
 ```
+
+#### Outputs
+```yaml
+name: tag
+
+on: [push, workflow_dispatch]
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    steps:
+      - id: tag
+        uses: j5pu/actions/tag@main
+      - run: |
+          echo ${{ steps.tag.outputs.changed }} 
+          echo ${{ steps.tag.outputs.current }} 
+          echo ${{ steps.tag.outputs.next }} 
+          echo ${{ steps.tag.outputs.prefix }}
+        shell: bash
+```
