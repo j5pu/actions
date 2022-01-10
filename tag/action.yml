@@ -81,14 +81,6 @@ runs:
       if: steps.current.outputs.version == steps.next.outputs.version
       shell: bash
 
-    - name: setting PATH with git-next
-      run: echo "${{github.action_path}}" >> $GITHUB_PATH
-      shell: bash
-
-    - id: git-next
-      run: git-next
-      shell: sh
-
     - name: Create release
       id: create
       uses: softprops/action-gh-release@v1
