@@ -90,6 +90,15 @@ Repository will be checkout with fetch-depth: 0 and te following will be done if
 
 ### Examples:
 
+Use te following to not trigger on tags (only pushing commits):
+
+```yaml
+on:
+  push:
+    branches:
+      - '**'
+```
+
 ### Another action to be triggered after tag
 An action in a workflow run 
 [can’t trigger a new workflow](https://github.community/t/github-actions-workflow-not-triggering-with-tag-push/17053/2).
@@ -101,7 +110,11 @@ secrets.sh
 ```yaml
 name: tag
 
-on: [push, workflow_dispatch]
+on:
+  push:
+    branches:
+      - '**'
+  workflow_dispatch:
 
 env:
   GITHUB_TOKEN: ${{ secrets.TOKEN }}
@@ -117,7 +130,11 @@ jobs:
 ```yaml
 name: tag
 
-on: [push, workflow_dispatch]
+on:
+  push:
+    branches:
+      - '**'
+  workflow_dispatch:
 
 jobs:
   tag:
@@ -130,7 +147,11 @@ jobs:
 ```yaml
 name: tag
 
-on: [push, workflow_dispatch]
+on:
+  push:
+    branches:
+      - '**'
+  workflow_dispatch:
 
 jobs:
   tag:
