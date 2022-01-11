@@ -58,7 +58,7 @@ runs:
 
     - name: "Install pypa/build"
       run: |
-        python -m pip install build --user
+        python -m pip install build --quiet --user
       shell: bash
       if: steps.OUTPUT.outputs.PYTHON == 'true'
 
