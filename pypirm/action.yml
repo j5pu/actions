@@ -33,9 +33,6 @@ runs:
             pypi-cleanup -u ${{ inputs.pypi_user}} -p ${NAME} --do-it --yes -r ${i}
           done
         fi
-        echo '::echo::on'
-        echo "::set-output name=NAME::${NAME}"
-        echo "::set-output name=VERSIONS::${VERSIONS}"
       shell: bash
       env:
         PYPI_CLEANUP_PASSWORD: ${{ inputs.pypi_password }}
