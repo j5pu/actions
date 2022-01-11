@@ -16,63 +16,23 @@ inputs:
     required: true
     default: ${{ github.actor }}
 
-outputs:
-  NAME:
-    description: "Package: name"
-    value: ${{ steps.PYTHON.outputs.NAME }}
-
-  VERSIONS:
-    description: "Delete: versions"
-    value: ${{ steps.PYTHON.outputs.VERSIONS }}
-
 runs:
   using: "composite"
   steps:
-    - uses: actions/checkout@v2
-      with:
-        fetch-depth: 0
-
-    - run: echo ${{ inputs.pypi_user}}
-      shell: bash
-
-    - name: "Python"
-      id: PYTHON
+    - name: "Delete distribution 📦 from PyPI"
       run: |
-        if [ -f setup.cfg ]; then 
+        if [ -f setup.cfg ]; then
+          sudo python -m pip install --quiet pypi-cleanup
           NAME="$(sed 's/ //g' setup.cfg | awk -F '=' '/^name=/ { print $2 }')"
-          VERSIONS="$(curl -sGL https://pypi.org/pypi/${NAME}/json | jq -r '.releases | keys[] as $k | $k' | \
-            sort -V | head -n -${{ inputs.keep }})"
+          for i in $(curl -sGL https://pypi.org/pypi/${NAME}/json | jq -r '.releases | keys[] as $k | $k' | \
+              sort -V | head -n -${{ inputs.keep }}); do 
+            pypi-cleanup -u ${{ inputs.pypi_user}} -p ${NAME} --do-it --yes -r ${i}
+          done
         fi
         echo '::echo::on'
         echo "::set-output name=NAME::${NAME}"
         echo "::set-output name=VERSIONS::${VERSIONS}"
       shell: bash
-      if: ${{!github.event.repository.private}}
-
-    - name: "Set up Python ${{ inputs.version }}"
-      uses: actions/setup-python@v1
-      with:
-        python-version: ${{ inputs.version }}
-      if: steps.PYTHON.outputs.VERSIONS != ''
-
-    - name: "Install pypi-cleanup"
-      run: sudo python -m pip install --quiet pypi-cleanup
-      shell: bash
-      if: steps.PYTHON.outputs.VERSIONS != ''
-
-    - name: "Delete distribution 📦 from PyPI"
-      run: |
-        for i in $(echo "${{ steps.PYTHON.outputs.VERSIONS }}" | tr '\n' ' '); do 
-          pypi-cleanup -u ${{ inputs.pypi_user}} -p ${{ steps.PYTHON.outputs.NAME }} --do-it --yes -r ${i}
-        done
-      shell: bash
       env:
         PYPI_CLEANUP_PASSWORD: ${{ inputs.pypi_password }}
-      if: steps.PYTHON.outputs.VERSIONS != ''
-
-    - name: "PyPi versions"
-      run: |
-        curl -sGL https://pypi.org/pypi/${{ steps.PYTHON.outputs.NAME }}/json | \
-          jq -r '.releases | keys[] as $k | $k' | sort -V
-      shell: bash
-      if: steps.PYTHON.outputs.VERSIONS != ''
+      if: ${{!github.event.repository.private}}
