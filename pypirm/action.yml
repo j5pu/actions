@@ -41,7 +41,7 @@ runs:
         if [ ! -f setup.cfg ]; then 
           PACKAGE="$(sed 's/ //g' setup.cfg | awk -F '=' '/^name=/ { print $2 }')"
           VERSIONS="$(curl -sGL https://pypi.org/pypi/${{ PACKAGE }}/json | jq -r '.releases | keys[] as $k | $k' | \
-            sort -V | head -n ${{ inputs.keep }})"
+            sort -V | head -n -${{ inputs.keep }})"
         fi
         echo '::echo::on'
         echo "::set-output name=NAME::${NAME}"
