@@ -64,8 +64,10 @@ runs:
 
     - name: "Build a binary wheel and a source tarball"
       run: |
-        python -m build --sdist --wheel --outdir dist/ .
+        python -m build --sdist --wheel --config-setting=--global-option=verbose=0 --outdir dist/ .
       shell: bash
+      env:
+        PYTHONWARNINGS: ignore
       if: steps.OUTPUT.outputs.PYTHON == 'true'
 
     - name: "Publish distribution 📦 to PyPI"
