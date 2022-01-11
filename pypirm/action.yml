@@ -69,3 +69,10 @@ runs:
       env:
         PYPI_CLEANUP_PASSWORD: ${{ inputs.pypi_password }}
       if: steps.PYTHON.outputs.VERSIONS != ''
+
+    - name: "PyPi versions"
+      run: |
+        curl -sGL https://pypi.org/pypi/${{ steps.PYTHON.outputs.NAME }}/json | \
+          jq -r '.releases | keys[] as $k | $k' | sort -V
+      shell: bash
+      if: steps.PYTHON.outputs.VERSIONS != ''
