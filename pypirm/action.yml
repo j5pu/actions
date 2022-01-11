@@ -28,7 +28,7 @@ runs:
           NAME="$(sed 's/ //g' setup.cfg | awk -F '=' '/^name=/ { print $2 }')"
           for i in $(curl -sGL -H 'Cache-Control: no-cache' -H 'Host: pypi.org' -H 'Accept: application/json' \
               "https://pypi.org/pypi/${NAME}/json/?$(date +%s)" | \
-              jq -r '.releases | keys[] as $k | $k' | \
+              jq -r '.releases | keys[] as $k | $k' 2>/dev/null | \
               sort -V | head -n -${{ inputs.keep }}); do 
             pypi-cleanup -u ${{ inputs.pypi_user}} -p ${NAME} --do-it --yes -r ${i}
           done
