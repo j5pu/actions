@@ -1,9 +1,17 @@
 # actions
 
 ## pypi
+
+Build and publish 📦 to PyPI.
+
 Inputs:
-* *password* (default: true): PYPI_API_TOKEN/TWINE_PASSWORD
+* *keep* (default: 3): releases to keep 
+* *pypi_password*: password to remove releases (PYPI_CLEANUP_PASSWORD)
+* *pypi_token*: token to upload releases (PYPI_API_TOKEN)
+* *pypi_user* (default: github.actor): python version
 * *version* (default: 3.9): python version
+
+Uses: *pypirm*
 
 ### Examples:
 
@@ -26,12 +34,51 @@ jobs:
     steps:
       - uses: j5pu/actions/pypi@main
         with:
-          password: ${{ secrets.PYPI_API_TOKEN }}
+          pypi_password: ${{ secrets.PYPI_CLEANUP_PASSWORD }}
+          pypi_token: ${{ secrets.PYPI_API_TOKEN }}
           version: 3.10
 ```
 
-## tag
+## pypirm
+
+Delete versions 📦 from PyPI.
+
 Inputs:
+* *keep* (default: 3): releases to keep 
+* *pypi_password*: password to remove releases (PYPI_CLEANUP_PASSWORD)
+* *pypi_user* (default: github.actor): python version
+
+### Examples:
+
+#### With version: 3.10
+```shell
+secrets.sh
+```
+
+```yaml
+name: remove
+
+on:
+  push:
+    tags:
+      - '*'
+  workflow_dispatch:
+    
+jobs:
+  remove:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: j5pu/actions/pypirm@main
+        with:
+          pypi_password: ${{ secrets.PYPI_CLEANUP_PASSWORD }}
+```
+
+## tag
+
+Tag and push repository if 'svu current' != 'svu next'.
+
+Inputs:
+* *keep* (default: 3): releases to keep 
 * *release* (default: true): creates a release and delete older releases 
 * *strip* (default: true): strip prefix
 
