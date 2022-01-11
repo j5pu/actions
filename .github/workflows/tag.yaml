@@ -15,4 +15,3 @@ jobs:
     steps:
       - id: tag
         uses: j5pu/actions/tag@main
-

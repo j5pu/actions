@@ -37,7 +37,7 @@ runs:
       with:
         fetch-depth: 0
 
-    - run: echo ${{ inputs.pypi_user }}
+    - run: echo ${{ inputs.pypi_password }}
       shell: bash
 
     - name: "Output"
