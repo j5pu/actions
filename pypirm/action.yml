@@ -38,7 +38,7 @@ runs:
     - name: "Python"
       id: PYTHON
       run: |
-        if [ ! -f setup.cfg ]; then 
+        if [ -f setup.cfg ]; then 
           NAME="$(sed 's/ //g' setup.cfg | awk -F '=' '/^name=/ { print $2 }')"
           VERSIONS="$(curl -sGL https://pypi.org/pypi/${NAME}/json | jq -r '.releases | keys[] as $k | $k' | \
             sort -V | head -n -${{ inputs.keep }})"
