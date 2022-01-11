@@ -1,6 +1,10 @@
 name: 'Build and publish 📦 to PyPI'
 description: 'Build and publish 📦 to PyPI'
 
+branding:
+  icon: "package"
+  color: "orange"
+
 inputs:
   keep:
     description: 'Release: keep'

@@ -1,6 +1,10 @@
 name: 'Delete versions 📦 from PyPI'
 description: 'Delete versions 📦 from PyPI'
 
+branding:
+  icon: "package"
+  color: "red"
+
 inputs:
   keep:
     description: 'Release: keep'

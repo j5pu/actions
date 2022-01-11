@@ -1,4 +1,5 @@
 # actions
+![main](https://github.com/j5pu/homebrew-dev/actions/workflows/pypi.yaml/badge.svg)
 
 ## pypi
 

@@ -1,6 +1,10 @@
 name: tag
 description: "Tag and push repository if 'svu current' != 'svu next'"
 
+branding:
+  icon: "tag"
+  color: "green"
+
 inputs:
   keep:
     description: 'Release: keep'
