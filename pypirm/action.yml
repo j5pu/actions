@@ -19,6 +19,8 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - uses: actions/checkout@v2
+
     - name: "Delete distribution 📦 from PyPI"
       run: |
         if [ -f setup.cfg ]; then
