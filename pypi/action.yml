@@ -45,7 +45,6 @@ runs:
         echo '::echo::on'
         echo "::set-output name=PYTHON::${PYTHON}"
       shell: bash
-      if: ${{!github.event.repository.private}}
 
     - name: "Set up Python ${{ inputs.version }}"
       uses: actions/setup-python@v1
@@ -71,10 +70,11 @@ runs:
       uses: pypa/gh-action-pypi-publish@master
       with:
         password: ${{ inputs.pypi_token }}
-      if: steps.OUTPUT.outputs.PYTHON == 'true'
+      if: ${{!github.event.repository.private}} && steps.OUTPUT.outputs.PYTHON == 'true'
 
     - uses: j5pu/actions/pypirm@main
       with:
         keep: ${{ inputs.keep }}
         pypi_password: ${{ inputs.pypi_password }}
         pypi_user: ${{ inputs.pypi_user }}
+      if: ${{!github.event.repository.private}} && steps.OUTPUT.outputs.PYTHON == 'true'
