@@ -62,7 +62,7 @@ runs:
 
     - name: "Delete distribution 📦 from PyPI"
       run: |
-        for i in $(echo ${{ steps.PYTHON.outputs.VERSIONS }} | tr '\n' ' '); do 
+        for i in $(echo "${{ steps.PYTHON.outputs.VERSIONS }}" | tr '\n' ' '); do 
           pypi-cleanup -u ${{ inputs.pypi_user}} -p ${{ steps.PYTHON.outputs.NAME }} --do-it --yes -r ${i}
         done
       shell: bash
