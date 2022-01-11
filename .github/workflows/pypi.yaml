@@ -13,4 +13,4 @@ jobs:
         with:
           pypi_password: ${{ secrets.PYPI_CLEANUP_PASSWORD }}
           pypi_token: ${{ secrets.PYPI_API_TOKEN }}
-          version: 3.10
+          version: "3.10"
