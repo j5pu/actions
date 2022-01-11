@@ -1,0 +1,19 @@
+name: tag
+
+on: [push, workflow_dispatch]
+
+env:
+  GITHUB_TOKEN: ${{ secrets.TOKEN }}
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    steps:
+      - id: tag
+        uses: j5pu/actions/tag@main
+      - run: |
+          echo ${{ steps.tag.outputs.changed }} 
+          echo ${{ steps.tag.outputs.current }} 
+          echo ${{ steps.tag.outputs.next }} 
+          echo ${{ steps.tag.outputs.prefix }}
+        shell: bash
