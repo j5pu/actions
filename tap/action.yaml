@@ -78,6 +78,9 @@ runs:
       run: test -f actions/LICENSE
       shell: bash
 
+    - run: rm -rf $GITHUB_WORKSPACE/*
+      shell: bash
+
     - id: ID
       uses: j5pu/actions/id@main
 
@@ -135,6 +138,9 @@ runs:
         rm -rf formula_create
       shell: bash
 
+    - run: rm -rf $GITHUB_WORKSPACE/*
+      shell: bash
+
     - name: "Formula: release"
       uses: Justintime50/homebrew-releaser@v1
       with:
@@ -150,6 +156,9 @@ runs:
         skip_commit: ${{ inputs.skip_commit }}
         update_readme_table: ${{ inputs.update_readme_table }}
         debug: ${{ inputs.debug }}
+
+    - run: rm -rf $GITHUB_WORKSPACE/*
+      shell: bash
 
     - uses: actions/checkout@v2
       with:
@@ -255,8 +264,9 @@ runs:
           git push 
         fi
         cd -
-        rm -rf brewfile_workflows
-        rm -rf homebrew-${{ inputs.homebrew_tap }}
+      shell: bash
+
+    - run: rm -rf $GITHUB_WORKSPACE/*
       shell: bash
 
     - name: "Formula: tag"
