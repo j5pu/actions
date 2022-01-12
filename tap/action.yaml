@@ -73,17 +73,9 @@ runs:
 
     - name: "Create Formula"
       run: |
-        cat .git/config
-        pwd 
-        ls -la
-        if [ ! -d ${{ inputs.formula_folder }} ]; then 
-          mkdir ${{ inputs.formula_folder }}
-          git add ${{ inputs.formula_folder }}
-          git commit -a -m "${{ github.workflow }}"
-          git push 
-        fi
         file=${{ inputs.formula_folder }}/${{ github.event.repository.name }}.rb
-        if [ ! -f ${file} ]; then 
+        if [ ! -f ${file} ]; then
+          mkdir -p ${{ inputs.formula_folder }}
           touch ${file}
           git add ${file}
           git commit -a -m ${file}
