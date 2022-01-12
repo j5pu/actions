@@ -1,0 +1,29 @@
+name: "GitHub ID"
+description: "GitHub ID"
+
+branding:
+  icon: "user-check"
+  color: "cyan"
+
+inputs:
+  user:
+    description: 'GitHub: user'
+    required: false
+    default: ${{ github.actor }}
+
+outputs:
+  CHANGED:
+    description: "GitHub: ID"
+    value: ${{ steps.ID.outputs.result }}
+
+runs:
+  using: "composite"
+  steps:
+      - name: "GitHub: ID"
+        id: ID
+        uses: actions/github-script@v5
+        with:
+          script: |
+            await github.rest.users.getByUsername({
+              username: ${{ inputs.user }}
+             }).id

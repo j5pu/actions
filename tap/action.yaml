@@ -77,7 +77,7 @@ runs:
         token: ${{ env.GITHUB_TOKEN }}
 
     - name: "Git: config"
-      run:
+      run: |
         git config --global user.email "${{ inputs.commit_email }}"
         git config --global user.name "${{ inputs.commit_owner }}"
       shell: bash

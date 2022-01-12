@@ -1,0 +1,10 @@
+name: id
+
+on:
+  workflow_dispatch:
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: j5pu/actions/id@main
