@@ -2,7 +2,7 @@
 
 ![main](https://github.com/j5pu/actions/actions/workflows/pypi.yaml/badge.svg)
 
-## pypi
+## [pypi](pypi)
 
 Build and publish 📦 to PyPI.
 
@@ -10,10 +10,10 @@ Inputs:
 * *keep* (default: 3): releases to keep 
 * *pypi_password*: password to remove releases (PYPI_CLEANUP_PASSWORD)
 * *pypi_token*: token to upload releases (PYPI_API_TOKEN)
-* *pypi_user* (default: github.actor): python version
+* *pypi_user* (default: `github.actor`): python version
 * *version* (default: 3.9): python version
 
-Uses: *pypirm*
+Uses: [pypirm](pypirm)
 
 ### Examples:
 
@@ -41,14 +41,14 @@ jobs:
           version: 3.10
 ```
 
-## pypirm
+## [pypirm](pypirm)
 
 Delete versions 📦 from PyPI.
 
 Inputs:
 * *keep* (default: 3): releases to keep 
 * *pypi_password*: password to remove releases (PYPI_CLEANUP_PASSWORD)
-* *pypi_user* (default: github.actor): python version
+* *pypi_user* (default: `github.actor`): python version
 
 ### Examples:
 
@@ -75,13 +75,14 @@ jobs:
           pypi_password: ${{ secrets.PYPI_CLEANUP_PASSWORD }}
 ```
 
-## tag
+## [tag](tag)
 
 Tag and push repository if 'svu current' != 'svu next'.
 
 Inputs:
 * *keep* (default: 3): releases to keep 
 * *release* (default: true): creates a release and delete older releases 
+* *repository* (default: `github.repository`): repository owner/name
 * *strip* (default: true): strip prefix
 
 Repository will be checkout with fetch-depth: 0 and te following will be done if `svu next` != `svu current`:
@@ -200,4 +201,119 @@ jobs:
           echo ${{ steps.tag.outputs.next }} 
           echo ${{ steps.tag.outputs.prefix }}
         shell: bash
+```
+
+## [tap](tap)
+
+Brew Tap Release.
+
+A `LICENSE` file is required.
+
+Inputs:
+* *commit_email* (default: 
+`${{ github.event.schedule.user.id }}+${{ github.workflow }}@users.noreply.github.com`) 
+* *commit_owner* (default: `github.workflow`)
+* *debug* (default: false)
+* *depends_on*
+* *formula_folder* (default: Formula) 
+* *github_token* (default: `env.GITHUB_TOKEN`) 
+* *homebrew_owner* (default: `github.actor`) 
+* *homebrew_tap* (default: dev)
+* *install* (default: `bin.install "#{name}"`)
+* *skip_commit* (default: false)
+* *test* (default: `system "test", "-x", "#{name}"`)
+* *update_readme_table* (default: true)
+
+The following will be done on the tap repository:
+* *Formula: create*: create empty formula file.
+* *Formula: release*: release formula file with inputs using
+[Justintime50/homebrew-releaser](https://github.com/Justintime50/homebrew-releaser).
+* *Formula: workflow*: creates a workflow for testing.
+* *Formula: tag*: tags the formula repository to trigger the testing workflow, using [tag](tag).
+
+### Examples:
+
+#### Separate workflow for tag and tap
+```bash
+secrets.sh
+```
+
+```yaml
+name: tag
+
+on:
+  push:
+    branches:
+      - '**'
+  workflow_dispatch:
+
+env:
+  GITHUB_TOKEN: ${{ secrets.TOKEN }}
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    steps:
+      - id: tag
+        uses: j5pu/actions/tag@main
+```
+
+```yaml
+name: tap
+
+on:
+  push:
+    tags:
+      - '**'
+
+jobs:
+  tap:
+    runs-on: ubuntu-latest
+    name: tap
+    steps:
+      - name: "Release to Homebrew tap"
+        uses: j5pu/actions/tap@main
+        with:
+          github_token: ${{ secrets.TOKEN }}
+          depends_on: |
+            "bats-core"
+            "bats-core/bats-core/bats-assert"
+            "bats-core/bats-core/bats-file"
+            "bats-core/bats-core/bats-support"
+          install: 'bin.install "#{name}.bash"'
+          test: |
+            system "sh", "-c", "#{HOMEBREW_PREFIX}/bin/bats.bash && command -v assert_file_exist"
+```
+
+#### Single workflow
+```bash
+secrets.sh
+```
+
+Assumes executable with the same name of repository `${{ github.event.repository.name }}`.
+
+```yaml
+name: main
+
+on:
+  push:
+    branches:
+      - '**'
+  workflow_dispatch:
+
+env:
+  GITHUB_TOKEN: ${{ secrets.TOKEN }}
+
+jobs:
+  main:
+    runs-on: ubuntu-latest
+    name: "Tag & Tap"
+    steps:
+      - name: "Tag"
+        id: TAG
+        uses: j5pu/actions/tag@main
+        
+      - name: "Tap"
+        uses: j5pu/actions/tap@main
+        if: steps.TAG.outputs.CHANGED == 'true'
 ```

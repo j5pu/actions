@@ -11,13 +11,18 @@ inputs:
     required: false
     default: '3'
 
-  strip:
-    description: 'Version: strip prefix'
+  release:
+    description: 'Release: create'
     required: false
     default: 'true'
 
-  release:
-    description: 'Release: create'
+  repository:
+    description: 'Repository: user/name'
+    required: false
+    default: ${{ github.repository }}
+
+  strip:
+    description: 'Version: strip prefix'
     required: false
     default: 'true'
 
@@ -44,6 +49,7 @@ runs:
     - uses: actions/checkout@v2
       with:
         fetch-depth: 0
+        repository: ${{ inputs.repository }}
         token: ${{ env.GITHUB_TOKEN }}
 
     - name: "svu: ubuntu"
