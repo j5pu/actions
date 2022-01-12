@@ -132,6 +132,7 @@ runs:
           git push 
         fi
         cd -
+        rm -rf formula_create
       shell: bash
 
     - name: "Formula: release"
@@ -254,6 +255,8 @@ runs:
           git push 
         fi
         cd -
+        rm -rf brewfile_workflows
+        rm -rf homebrew-${{ inputs.homebrew_tap }}
       shell: bash
 
     - name: "Formula: tag"
