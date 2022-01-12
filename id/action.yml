@@ -27,3 +27,5 @@ runs:
             await github.rest.users.getByUsername({
               username: "${{ inputs.user }}"
              }).id
+      - run: echo ${{ steps.ID.outputs.result }}
+        shell: bash
