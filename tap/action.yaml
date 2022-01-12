@@ -64,9 +64,15 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: "GitHub: token"
+      run: echo "GITHUB_TOKEN=${{ inputs.github_token }}" >> $GITHUB_ENV
+      shell: bash
+      if: ${{ inputs.github_token }} != ''
+
     - uses: actions/checkout@v2
       with:
         path: actions
+        token: ${{ env.GITHUB_TOKEN }}
 
     - name: "LICENSE"
       run: test -f actions/LICENSE
@@ -83,14 +89,6 @@ runs:
           email=${{ inputs.commit_email }}
         fi
         echo "EMAIL=${email}" >> $GITHUB_ENV
-      shell: bash
-
-    - name: "GitHub: token"
-      run: echo "GITHUB_TOKEN=${{ inputs.github_token }}" >> $GITHUB_ENV
-      shell: bash
-      if: ${{ inputs.github_token }} != ''
-
-    - run: echo ${{ env.EMAIL }}
       shell: bash
 
     - name: "Git: config"
