@@ -55,8 +55,6 @@ on:
   push:
     tags:
       - '**'
-    tags-ignore:
-      - "latest"
   
 jobs:
   publish:
@@ -92,8 +90,6 @@ on:
   push:
     tags:
       - '*'
-    tags-ignore:
-      - "latest"
   workflow_dispatch:
     
 jobs:
@@ -202,8 +198,6 @@ on:
   push:
     tags:
       - '**'
-    tags-ignore:
-      - "latest"
   workflow_dispatch:
 
 jobs:
@@ -297,8 +291,6 @@ on:
   push:
     tags:
       - '**'
-    tags-ignore:
-      - "latest"
 
 jobs:
   tap:

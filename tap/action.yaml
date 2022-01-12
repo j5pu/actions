@@ -180,8 +180,6 @@ runs:
           push:
             tags:
               - '**'
-            tags-ignore:
-              - "latest"
           workflow_dispatch:
         
         jobs:
@@ -217,8 +215,6 @@ runs:
           push:
             tags:
               - '**'
-            tags-ignore:
-              - "latest"
           workflow_dispatch:
         
         jobs:
