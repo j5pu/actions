@@ -65,6 +65,12 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - uses: actions/checkout@v2
+
+    - name: "LICENSE"
+      run: test -f LICENSE
+      shell: bash
+
     - name: "GitHub: token"
       run: echo "GITHUB_TOKEN=${{ inputs.github_token }}" >> $GITHUB_ENV
       shell: bash
@@ -75,10 +81,6 @@ runs:
         repository: ${{ inputs.homebrew_owner }}/homebrew-${{ inputs.homebrew_tap }}
         fetch-depth: 0
         token: ${{ env.GITHUB_TOKEN }}
-
-    - name: "LICENSE"
-      run: test -f LICENSE
-      shell: bash
 
     - name: "Git: config"
       run: |
