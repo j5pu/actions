@@ -157,7 +157,7 @@ runs:
         update_readme_table: ${{ inputs.update_readme_table }}
         debug: ${{ inputs.debug }}
 
-    - run: rm -rf $GITHUB_WORKSPACE/*
+    - run: sudo rm -rf $GITHUB_WORKSPACE/*
       shell: bash
 
     - uses: actions/checkout@v2
