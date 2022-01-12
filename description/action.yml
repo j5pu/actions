@@ -22,7 +22,7 @@ runs:
       - name: "GitHub: description"
         id: DESCRIPRION
         run: |
-          echo "::set-output name=ID::$(curl -fsL -H "Accept: application/vnd.github.v3+json" \
+          echo "::set-output name=DESCRIPRION::$(curl -fsL -H "Accept: application/vnd.github.v3+json" \
            -H 'Authorization: token ${{ github.token }}' \
            https://api.github.com/repos/${{ inputs.repository }} | jq -r .description)"
         shell: bash
