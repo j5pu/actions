@@ -119,8 +119,12 @@ runs:
         fi
         
         if ! grep -q project_table_start README.md; then 
+          url=${{ inputs.homebrew_owner }}/homebrew-${{ inputs.homebrew_tap }}/actions/workflows/main.yaml/badge.svg
           {
-            echo '![main](https://github.com/${{ inputs.homebrew_owner }}/homebrew-${{ inputs.homebrew_tap }}/actions/workflows/main.yaml/badge.svg)'
+            echo
+            printf '%s' '![main](https://github.com/' "${url}" ')'
+            echo
+            echo ## Formulas
             echo '<!-- project_table_start -->'
             echo '#'
             echo '<!-- project_table_end -->'
@@ -158,14 +162,17 @@ runs:
     - name: "Formula: Brewfile"
       run: |
         cd brewfile_workflows
-        echo 'tap "${{ inputs.homebrew_owner }}/${{ inputs.homebrew_tap }}"' > Brewfile
+        echo 'tap "${{ inputs.homebrew_owner }}/${{ inputs.homebrew_tap }}"' > /tmp/Brewfile
         
         while read -r formula; do
-          echo "brew \"${formula}\"" >> Brewfile
+          echo "brew \"${{ inputs.homebrew_owner }}/${{ inputs.homebrew_tap }}/${formula}\"" >> /tmp/Brewfile
         done < <(find Formula -type f -name "*.rb" -exec basename {} .rb \;)
-        git add Brewfile
-        git commit -a -m "Brewfile"
-        git push
+        if ! cmp --quiet /tmp/Brewfile Brewfile; then
+          mv /tmp/Brewfile Brewfile
+          git add Brewfile
+          git commit -a -m "Brewfile"
+          git push
+        fi
         cd -
       shell: bash
 
@@ -239,12 +246,10 @@ runs:
                 run: brew tap ${{ inputs.homebrew_owner }}/${{ inputs.homebrew_tap }}
               - name: "${{ github.event.repository.name }}: install"
                 run: |
-                  brew install \
-                    ${{ inputs.homebrew_owner }}/${{ inputs.homebrew_tap }}/${{ github.event.repository.name }}
+                  brew install ${{ inputs.homebrew_owner }}/${{ inputs.homebrew_tap }}/${{github.event.repository.name}}
               - name: "${{ github.event.repository.name }}: test"
                 run: |
-                  brew test \
-                    ${{ inputs.homebrew_owner }}/${{ inputs.homebrew_tap }}/${{ github.event.repository.name }}
+                  brew test ${{ inputs.homebrew_owner }}/${{ inputs.homebrew_tap }}/${{ github.event.repository.name }}
         EOF
           git add ${file}
           git commit -a -m "feat: ${{ github.event.repository.name }}"
