@@ -32,7 +32,6 @@ inputs:
   github_token:
     description: "The GitHub Token that has `repo` permissions for the homebrew tap you want to release to."
     required: false
-    default: ${{ env.GITHUB_TOKEN }}
 
   homebrew_owner:
     description: "The name of the homebrew tap owner to publish your formula to as it appears on GitHub."
@@ -66,11 +65,16 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: "GitHub: token"
+      run: echo "GITHUB_TOKEN=${{ inputs.github_token }}" >> $GITHUB_ENV
+      shell: bash
+      if: ${{ inputs.github_token }}
+
     - uses: actions/checkout@v2
       with:
         repository: ${{ inputs.homebrew_owner }}/homebrew-${{ inputs.homebrew_tap }}
         fetch-depth: 0
-        token: ${{ inputs.github_token }}
+        token: ${{ env.GITHUB_TOKEN }}
 
     - name: "Git: config"
       run:
@@ -107,7 +111,7 @@ runs:
         homebrew_owner: ${{ inputs.homebrew_owner }}
         homebrew_tap: homebrew-${{ inputs.homebrew_tap }}
         formula_folder: ${{ inputs.formula_folder }}
-        github_token: ${{ inputs.github_token }}
+        github_token: ${{ env.GITHUB_TOKEN }}
         commit_owner: ${{ inputs.commit_owner }}
         commit_email: ${{ inputs.commit_email }}
         depends_on: ${{ inputs.depends_on }}
@@ -125,6 +129,7 @@ runs:
           mkdir -p .github/workflows
           cat > ${file} <<EOF
         name: ${{ github.event.repository.name }}
+        
         on: 
           push:
             tags:
@@ -166,4 +171,4 @@ runs:
       with:
         repository: ${{ inputs.homebrew_owner }}/homebrew-${{ inputs.homebrew_tap }}
       env:
-        GITHUB_TOKEN: ${{ inputs.github_token }}
+        GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
