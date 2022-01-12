@@ -14,19 +14,14 @@ inputs:
 outputs:
   ID:
     description: "GitHub: ID"
-    value: ${{ steps.ID.outputs.result }}
+    value: ${{ steps.ID.outputs.ID }}
 
 runs:
   using: "composite"
   steps:
       - name: "GitHub: ID"
         id: ID
-        uses: actions/github-script@v5
-        with:
-          script: |
-            await github.rest.users.getByUsername({
-              username: "${{ inputs.user }}"
-             }).id
-          result-encoding: string
-      - run: echo ${{ steps.ID.outputs.result }}
+        run: |
+          echo "::set-output name=ID::$(curl -fsL  -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/users/${{ inputs.user }} | jq -r .id)"
         shell: bash
