@@ -95,6 +95,7 @@ runs:
       id: create
       uses: softprops/action-gh-release@v1
       with:
+        repository: ${{ inputs.repository }}
         tag_name: ${{ steps.VERSION.outputs.NEXT }}
       if: inputs.release == 'true' && steps.VERSION.outputs.CHANGED == 'true'
 
@@ -103,6 +104,7 @@ runs:
       with:
         keep_latest: ${{ inputs.keep }}
         delete_tags: true
+        repo: ${{ inputs.repository }}
       env:
         GITHUB_TOKEN: ${{ github.token }}
       if: inputs.release == 'true' && steps.VERSION.outputs.CHANGED == 'true'
