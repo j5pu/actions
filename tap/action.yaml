@@ -92,20 +92,22 @@ runs:
     - run: echo ${{ env.EMAIL }}
       shell: bash
 
-    - uses: actions/checkout@v2
-      with:
-        repository: ${{ inputs.homebrew_owner }}/homebrew-${{ inputs.homebrew_tap }}
-        fetch-depth: 0
-        token: ${{ env.GITHUB_TOKEN }}
-
     - name: "Git: config"
       run: |
         git config --global user.email "${{ env.EMAIL }}"
         git config --global user.name "${{ inputs.commit_owner }}"
       shell: bash
 
+    - uses: actions/checkout@v2
+      with:
+        path: formula_create
+        repository: ${{ inputs.homebrew_owner }}/homebrew-${{ inputs.homebrew_tap }}
+        fetch-depth: 0
+        token: ${{ env.GITHUB_TOKEN }}
+
     - name: "Formula: create"
       run: |
+        cd formula_create
         file=${{ inputs.formula_folder }}/${{ github.event.repository.name }}.rb
         if [ ! -f ${file} ]; then
           mkdir -p ${{ inputs.formula_folder }}
@@ -117,14 +119,15 @@ runs:
         
         if ! grep -q project_table_start README.md; then 
           {
-            echo '# <!-- project_table_start -->'
-            echo '# TABLE HERE'
-            echo '# <!--project_table_end -->'
+            echo '![main](https://github.com/${{ inputs.homebrew_owner }}/homebrew-${{ inputs.homebrew_tap }}/actions/workflows/main.yaml/badge.svg)'
+            echo '<!-- project_table_start -->'
+            echo '<!-- project_table_end -->'
           } >> README.md
           git add README.md
           git commit -a -m README.md
           git push 
         fi
+        cd -
       shell: bash
 
     - name: "Formula: release"
@@ -145,18 +148,14 @@ runs:
 
     - uses: actions/checkout@v2
       with:
+        path: brewfile_workflows
         repository: ${{ inputs.homebrew_owner }}/homebrew-${{ inputs.homebrew_tap }}
         fetch-depth: 0
         token: ${{ env.GITHUB_TOKEN }}
 
-    - name: "Git: config"
-      run: |
-        git config --global user.email "${{ env.EMAIL }}"
-        git config --global user.name "${{ inputs.commit_owner }}"
-      shell: bash
-
     - name: "Formula: Brewfile"
       run: |
+        cd brewfile_workflows
         echo 'tap "${{ inputs.homebrew_owner }}/${{ inputs.homebrew_tap }}"' > Brewfile
         
         while read -r formula; do
@@ -165,10 +164,12 @@ runs:
         git add Brewfile
         git commit -a -m "Brewfile"
         git push
+        cd -
       shell: bash
 
     - name: "Bundle: workflow"
       run: |
+        cd brewfile_workflows
         file=.github/workflows/main.yaml
 
         if [ ! -f ${file} ]; then
@@ -200,10 +201,12 @@ runs:
           git commit -a -m "workflow: main"
           git push 
         fi
+        cd -
       shell: bash
 
     - name: "Formula: workflow"
       run: |
+        cd brewfile_workflows
         file=.github/workflows/${{ github.event.repository.name }}.yaml
 
         if [ ! -f ${file} ]; then
@@ -245,6 +248,7 @@ runs:
           git commit -a -m "feat: ${{ github.event.repository.name }}"
           git push 
         fi
+        cd -
       shell: bash
 
     - name: "Formula: tag"
