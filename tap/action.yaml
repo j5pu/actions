@@ -65,9 +65,11 @@ runs:
   using: "composite"
   steps:
     - uses: actions/checkout@v2
+      with:
+        path: actions
 
     - name: "LICENSE"
-      run: test -f LICENSE
+      run: test -f actions/LICENSE
       shell: bash
 
     - id: ID
@@ -75,7 +77,7 @@ runs:
 
     - name: "Commit: email"
       run: |
-        if [ ${{ inputs.commit_email }} = '' ]; then 
+        if [ "${{ inputs.commit_email }}" = "" ]; then 
           email=${{ steps.ID.outputs.ID }}+${{ github.workflow }}@users.noreply.github.com
         else 
           email=${{ inputs.commit_email }}
