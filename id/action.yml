@@ -25,5 +25,5 @@ runs:
         with:
           script: |
             await github.rest.users.getByUsername({
-              username: ${{ inputs.user }}
+              username: "${{ inputs.user }}"
              }).id
