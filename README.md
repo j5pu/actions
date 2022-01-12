@@ -2,6 +2,32 @@
 
 ![main](https://github.com/j5pu/actions/actions/workflows/pypi.yaml/badge.svg)
 
+
+## [id](id)
+
+GitHub ID.
+
+Inputs:
+* *user* (default: `github.actor`)
+
+### Examples:
+
+```yaml
+name: id
+
+on:
+  workflow_dispatch:
+
+jobs:
+  id:
+    runs-on: ubuntu-latest
+    steps:
+      - id: ID
+        uses: j5pu/actions/id@main
+      - run: echo ${{ steps.ID.outputs.ID }}
+
+```
+
 ## [pypi](pypi)
 
 Build and publish 📦 to PyPI.

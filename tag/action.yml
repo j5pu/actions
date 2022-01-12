@@ -114,7 +114,7 @@ runs:
       if: inputs.release == 'true' && steps.VERSION.outputs.CHANGED == 'true'
 
     - name: "Release: latest"
-      id: create
+      id: latest
       uses: softprops/action-gh-release@v1
       with:
         tag_name: latest
