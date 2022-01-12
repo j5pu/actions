@@ -12,7 +12,7 @@ inputs:
     default: ${{ github.actor }}
 
 outputs:
-  CHANGED:
+  ID:
     description: "GitHub: ID"
     value: ${{ steps.ID.outputs.result }}
 

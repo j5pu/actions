@@ -7,4 +7,7 @@ jobs:
   tag:
     runs-on: ubuntu-latest
     steps:
-      - uses: j5pu/actions/id@main
+      - id: ID
+        uses: j5pu/actions/id@main
+      - run: echo ${{ steps.ID.outputs.result }}
+      - run: echo ${{ steps.ID.outputs.ID }}
