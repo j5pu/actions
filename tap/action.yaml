@@ -102,14 +102,152 @@ runs:
 
     - uses: actions/checkout@v2
       with:
-        path: formula_create
+        path: start
         repository: ${{ inputs.homebrew_owner }}/homebrew-${{ inputs.homebrew_tap }}
         fetch-depth: 0
         token: ${{ env.GITHUB_TOKEN }}
 
+    - name: ".gitignore: create"
+      run: |
+        cd start
+        
+        cat > /tmp/file <<EOF
+        ### macOS template
+        .DS_Store
+        .AppleDouble
+        .LSOverride
+        Icon
+        ._*
+        .DocumentRevisions-V100
+        .fseventsd
+        .Spotlight-V100
+        .TemporaryItems
+        .Trashes
+        .VolumeIcon.icns
+        .com.apple.timemachine.donotpresent
+        .AppleDB
+        .AppleDesktop
+        Network Trash Folder
+        Temporary Items
+        .apdisk
+        
+        ### Linux template
+        .fuse_hidden*
+        .directory
+        .Trash-*
+        .nfs*
+        
+        ### Backup template
+        *.bak
+        *.gho
+        *.ori
+        *.orig
+        *.tmp
+        
+        ### JetBrains template
+        .idea/**/workspace.xml
+        .idea/**/tasks.xml
+        .idea/**/usage.statistics.xml
+        .idea/**/dictionaries
+        .idea/**/shelf
+        .idea/**/contentModel.xml
+        .idea/**/dataSources/
+        .idea/**/dataSources.ids
+        .idea/**/dataSources.local.xml
+        .idea/**/sqlDataSources.xml
+        .idea/**/dynamic.xml
+        .idea/**/uiDesigner.xml
+        .idea/**/dbnavigator.xml
+        .idea/**/gradle.xml
+        .idea/**/libraries
+        cmake-build-*/
+        .idea/**/mongoSettings.xml
+        *.iws
+        out/
+        .idea_modules/
+        atlassian-ide-plugin.xml
+        .idea/replstate.xml
+        com_crashlytics_export_strings.xml
+        crashlytics.properties
+        crashlytics-build.properties
+        fabric.properties
+        .idea/httpRequests
+        .idea/caches/build_file_checksums.ser
+
+        EOF
+        
+        if ! cmp --quiet /tmp/file .gitignore; then
+          mv /tmp/file .gitignore
+          git add .gitignore
+          git commit -a -m .gitignore
+          git push 
+        fi
+        
+        cd -
+      shell: bash
+
+    - name: "README.md?"
+      run: |
+        cd start
+        if test -f README.md; then
+          echo "README=1" >> $GITHUB_ENV
+        else 
+          echo "README=0" >> $GITHUB_ENV
+        fi
+      shell: bash
+
+    - name: "Repository: description"
+      id: DESCRIPTION
+      uses: j5pu/actions/description@main
+      if: ${{ env.README == '0' }}
+
+    - name: "README.md: create"
+      run: |
+        cd start
+        
+        if [ ! -f README.md ]; then
+          url=${{ inputs.homebrew_owner }}/homebrew-${{ inputs.homebrew_tap }}/actions/workflows/main.yaml/badge.svg
+          {
+            echo '# homebrew-${{ inputs.homebrew_tap }}'
+            echo
+            printf '%s' '![main](https://github.com/' "${url}" ')'
+            echo
+            echo "${{ steps.DESCRIPTION.outputs.DESCRIPTION }}."
+            echo
+          } > README.md
+        
+          git add README.md
+          git commit -a -m README.md
+          git push 
+        fi
+        
+        cd -
+      shell: bash
+      if: ${{ env.README == '0' }}
+
+    - name: "README.md: update"
+      run: |
+        cd start
+        
+        if ! grep -q project_table_start README.md; then 
+          {
+            echo '## Formulas'
+            echo '<!-- project_table_start -->'
+            echo '#'
+            echo '<!-- project_table_end -->'
+            echo
+          } >> README.md
+        
+          git commit -a -m "README.md: template"
+          git push 
+        fi
+        
+        cd -
+      shell: bash
+
     - name: "Formula: create"
       run: |
-        cd formula_create
+        cd start
         
         file=${{ inputs.formula_folder }}/${{ github.event.repository.name }}.rb
         
@@ -118,24 +256,6 @@ runs:
           touch ${file}
           git add ${file}
           git commit -a -m ${file}
-          git push 
-        fi
-        
-        if ! grep -q project_table_start README.md; then 
-          url=${{ inputs.homebrew_owner }}/homebrew-${{ inputs.homebrew_tap }}/actions/workflows/main.yaml/badge.svg
-
-          {
-            echo
-            printf '%s' '![main](https://github.com/' "${url}" ')'
-            echo
-            echo ## Formulas
-            echo '<!-- project_table_start -->'
-            echo '#'
-            echo '<!-- project_table_end -->'
-          } >> README.md
-        
-          git add README.md
-          git commit -a -m README.md
           git push 
         fi
         
@@ -166,14 +286,14 @@ runs:
 
     - uses: actions/checkout@v2
       with:
-        path: brewfile_workflows
+        path: end
         repository: ${{ inputs.homebrew_owner }}/homebrew-${{ inputs.homebrew_tap }}
         fetch-depth: 0
         token: ${{ env.GITHUB_TOKEN }}
 
     - name: "Formula: Brewfile"
       run: |
-        cd brewfile_workflows
+        cd end
 
         echo 'tap "${{ inputs.homebrew_owner }}/${{ inputs.homebrew_tap }}"' > /tmp/Brewfile
         
@@ -193,9 +313,66 @@ runs:
         cd -
       shell: bash
 
+    - name: "Workflow: codeql"
+      run: |
+        cd end
+        mkdir -p .github/workflows
+     
+        file=.github/workflows/codeql-analysis.yaml
+
+        cat > /tmp/file <<EOF
+        name: "CodeQL"
+
+        on:
+          push:
+            tags:
+              - '**'
+          schedule:
+            - cron: '32 4 * * 3'
+        
+        jobs:
+          analyze:
+            name: Analyze
+            runs-on: ubuntu-latest
+            permissions:
+              actions: read
+              contents: read
+              security-events: write
+        
+            strategy:
+              fail-fast: false
+              matrix:
+                language: [ 'ruby' ]
+        
+            steps:
+            - name: Checkout repository
+              uses: actions/checkout@v2
+        
+            - name: Initialize CodeQL
+              uses: github/codeql-action/init@v1
+              with:
+                languages: ${{ matrix.language }}
+            - name: Autobuild
+              uses: github/codeql-action/autobuild@v1
+        
+            - name: Perform CodeQL Analysis
+              uses: github/codeql-action/analyze@v1
+
+        EOF
+ 
+        if ! cmp --quiet /tmp/file ${file}; then
+          mv /tmp/file ${file}
+          git add ${file}
+          git commit -a -m "workflow: ${file}"
+          git push
+        fi
+        
+        cd -
+      shell: bash
+
     - name: "Bundle: workflow"
       run: |
-        cd brewfile_workflows
+        cd end
         mkdir -p .github/workflows
      
         file=.github/workflows/main.yaml
@@ -237,7 +414,7 @@ runs:
 
     - name: "Formula: workflow"
       run: |
-        cd brewfile_workflows
+        cd end
         mkdir -p .github/workflows
         
         file=.github/workflows/${{ github.event.repository.name }}.yaml
@@ -269,6 +446,8 @@ runs:
               - name: "${{ github.event.repository.name }}: install"
                 run: |
                   brew install ${{ inputs.homebrew_owner }}/${{ inputs.homebrew_tap }}/${{github.event.repository.name}}
+                env:
+                  HOMEBREW_NO_ENV_HINTS: 1
               - name: "${{ github.event.repository.name }}: test"
                 run: |
                   brew test ${{ inputs.homebrew_owner }}/${{ inputs.homebrew_tap }}/${{ github.event.repository.name }}

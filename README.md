@@ -2,6 +2,29 @@
 
 ![main](https://github.com/j5pu/actions/actions/workflows/pypi.yaml/badge.svg)
 
+## [description](description)
+
+GitHub repository description.
+
+Inputs:
+* *repository* (default: `github.repository`)
+
+### Examples:
+
+```yaml
+name: id
+
+on:
+  workflow_dispatch:
+
+jobs:
+  id:
+    runs-on: ubuntu-latest
+    steps:
+      - id: DESCRIPRION
+        uses: j5pu/actions/id@main
+      - run: echo ${{ steps.DESCRIPRION.outputs.DESCRIPRION }}
+```
 
 ## [id](id)
 

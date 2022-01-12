@@ -22,6 +22,7 @@ runs:
       - name: "GitHub: ID"
         id: ID
         run: |
-          echo "::set-output name=ID::$(curl -fsL  -H "Accept: application/vnd.github.v3+json" \
+          echo "::set-output name=ID::$(curl -fsL -H "Accept: application/vnd.github.v3+json" \
+            -H 'Authorization: token ${{ github.token }}' \
             https://api.github.com/users/${{ inputs.user }} | jq -r .id)"
         shell: bash
