@@ -106,19 +106,19 @@ runs:
       if: steps.VERSION.outputs.CHANGED == 'true'
       shell: bash
 
-    - name: "Release: create"
-      id: create
-      uses: softprops/action-gh-release@v1
-      with:
-        tag_name: ${{ steps.VERSION.outputs.NEXT }}
-      if: inputs.release == 'true' && steps.VERSION.outputs.CHANGED == 'true'
-
     - name: "Release: latest"
       id: latest
       uses: softprops/action-gh-release@v1
       with:
         tag_name: latest
       if: inputs.latest == 'true' && inputs.release == 'true' && steps.VERSION.outputs.CHANGED == 'true'
+
+    - name: "Release: create"
+      id: create
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: ${{ steps.VERSION.outputs.NEXT }}
+      if: inputs.release == 'true' && steps.VERSION.outputs.CHANGED == 'true'
 
     - name: "Keep"
       run: |

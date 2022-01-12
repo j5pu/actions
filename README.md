@@ -54,8 +54,10 @@ name: publish
 on:
   push:
     tags:
-      - '*'
-    
+      - '**'
+    tags-ignore:
+      - "latest"
+  
 jobs:
   publish:
     runs-on: ubuntu-latest
@@ -90,6 +92,8 @@ on:
   push:
     tags:
       - '*'
+    tags-ignore:
+      - "latest"
   workflow_dispatch:
     
 jobs:
@@ -197,7 +201,9 @@ name: publish
 on:
   push:
     tags:
-      - '*'
+      - '**'
+    tags-ignore:
+      - "latest"
   workflow_dispatch:
 
 jobs:
@@ -291,6 +297,8 @@ on:
   push:
     tags:
       - '**'
+    tags-ignore:
+      - "latest"
 
 jobs:
   tap:

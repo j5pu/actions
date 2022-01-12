@@ -120,7 +120,7 @@ runs:
             echo '# <!-- project_table_start -->'
             echo '# TABLE HERE'
             echo '# <!--project_table_end -->'
-          } > README.md
+          } >> README.md
           git add README.md
           git commit -a -m README.md
           git push 
@@ -155,6 +155,55 @@ runs:
         git config --global user.name "${{ inputs.commit_owner }}"
       shell: bash
 
+    - name: "Formula: Brewfile"
+      run: |
+        echo 'tap "${{ inputs.homebrew_owner }}/${{ inputs.homebrew_tap }}"' > Brewfile
+        
+        while read -r formula; do
+          echo "brew \"${formula}\" >> Brewfile
+        done < <(find Formula -type f -name "*.rb" -exec basename {} .rb \;)
+        git add Brewfile
+        git commit -a -m "Brewfile"
+        git push
+      shell: bash
+
+    - name: "Bundle: workflow"
+      run: |
+        file=.github/workflows/main.yaml
+
+        if [ ! -f ${file} ]; then
+          mkdir -p .github/workflows
+          cat > ${file} <<EOF
+        name: main
+        
+        on: 
+          push:
+            tags:
+              - '**'
+            tags-ignore:
+              - "latest"
+          workflow_dispatch:
+        
+        jobs:
+          main:
+            runs-on: macos-latest
+            steps:
+              - uses: actions/checkout@v2
+                with:
+                  fetch-depth: 0
+              - name: Set up Homebrew
+                uses: Homebrew/actions/setup-homebrew@master
+              - name: Uninstall bats
+                run: brew uninstall bats
+              - name: "Bundle: install"
+                run: brew bundle --quiet --no-lock
+        EOF
+          git add ${file}
+          git commit -a -m "workflow: main"
+          git push 
+        fi
+      shell: bash
+
     - name: "Formula: workflow"
       run: |
         file=.github/workflows/${{ github.event.repository.name }}.yaml
@@ -168,10 +217,12 @@ runs:
           push:
             tags:
               - '**'
+            tags-ignore:
+              - "latest"
           workflow_dispatch:
         
         jobs:
-          test:
+          ${{ github.event.repository.name }}:
             runs-on: macos-latest
             steps:
               - uses: actions/checkout@v2
@@ -195,7 +246,7 @@ runs:
                     ${{ inputs.homebrew_owner }}/${{ inputs.homebrew_tap }}/${{ github.event.repository.name }}
         EOF
           git add ${file}
-          git commit -a -m ${file}
+          git commit -a -m "feat: ${{ github.event.repository.name }}"
           git push 
         fi
       shell: bash
