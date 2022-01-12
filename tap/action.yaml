@@ -89,6 +89,9 @@ runs:
       shell: bash
       if: ${{ inputs.github_token }} != ''
 
+    - run: echo ${{ env.EMAIL }}
+      shell: bash
+
     - uses: actions/checkout@v2
       with:
         repository: ${{ inputs.homebrew_owner }}/homebrew-${{ inputs.homebrew_tap }}

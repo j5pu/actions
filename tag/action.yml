@@ -9,7 +9,12 @@ inputs:
   keep:
     description: 'Release: keep'
     required: false
-    default: '4'
+    default: '3'
+
+  latest:
+    description: 'Release: latest'
+    required: false
+    default: 'true'
 
   release:
     description: 'Release: create'
@@ -84,22 +89,20 @@ runs:
         echo "::set-output name=PREFIX::${PREFIX}"
       shell: bash
 
-    - name: "Latest: remove"
+    - name: "Latest"
       run: |
         gh release delete latest --yes --repo ${{github.repository}} 2>/dev/null || true
         git tag -d latest 2>/dev/null || true
         git push --delete origin latest 2>/dev/null || true
         git tag latest
         git push origin latest
-      if: steps.VERSION.outputs.CHANGED == 'true'
+      if: steps.VERSION.outputs.CHANGED == 'true' && inputs.latest == 'true'
       shell: bash
 
     - name: "Tag & push"
       run: |
         git tag ${{ steps.VERSION.outputs.NEXT }}
         git push origin ${{ steps.VERSION.outputs.NEXT }}
-        git tag latest
-        git push origin latest
       if: steps.VERSION.outputs.CHANGED == 'true'
       shell: bash
 
@@ -110,17 +113,27 @@ runs:
         tag_name: ${{ steps.VERSION.outputs.NEXT }}
       if: inputs.release == 'true' && steps.VERSION.outputs.CHANGED == 'true'
 
-    - name: "Latest: create"
+    - name: "Release: latest"
       id: create
       uses: softprops/action-gh-release@v1
       with:
         tag_name: latest
+      if: inputs.latest == 'true' && inputs.release == 'true' && steps.VERSION.outputs.CHANGED == 'true'
+
+    - name: "Keep"
+      run: |
+        if [ ${{ inputs.latest }} = 'true' ]; then
+          echo "KEEP=$(( ${{ inputs.keep }}+1 ))" >> $GITHUB_ENV
+        else 
+          echo "KEEP=${{ inputs.keep }}" >> $GITHUB_ENV
+        fi
+      shell: bash
       if: inputs.release == 'true' && steps.VERSION.outputs.CHANGED == 'true'
 
     - name: "Release: delete"
       uses: dev-drprasad/delete-older-releases@v0.2.0
       with:
-        keep_latest: ${{ inputs.keep }}
+        keep_latest: ${{ env.KEEP }}
         delete_tags: true
       env:
         GITHUB_TOKEN: ${{ github.token }}
