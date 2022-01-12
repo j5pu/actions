@@ -26,6 +26,7 @@ runs:
           script: |
             await github.rest.users.getByUsername({
               username: "${{ inputs.user }}"
-             })
+             }).id
+          result-encoding: string
       - run: echo ${{ steps.ID.outputs.result }}
         shell: bash
