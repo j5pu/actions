@@ -14,7 +14,7 @@ inputs:
   homebrew_tap:
     description: "The name of the homebrew tap to publish your formula to as it appears on GitHub."
     required: false
-    default: "homebrew-dev"
+    default: "dev"
 
   formula_folder:
     description: "The name of the folder in your homebrew tap where formula will be committed to."
@@ -65,7 +65,7 @@ runs:
   steps:
     - uses: actions/checkout@v2
       with:
-        repository: ${{ inputs.homebrew_owner }}/homebrew-${{ github.event.repository.name }}
+        repository: ${{ inputs.homebrew_owner }}/homebrew-${{ inputs.homebrew_tap }}
         fetch-depth: 0
         token: ${{ inputs.github_token }}
 
@@ -91,7 +91,7 @@ runs:
     - uses: Justintime50/homebrew-releaser@v1
       with:
         homebrew_owner: ${{ inputs.homebrew_owner }}
-        homebrew_tap: ${{ inputs.homebrew_tap }}
+        homebrew_tap: homebrew-${{ inputs.homebrew_tap }}
         formula_folder: ${{ inputs.formula_folder }}
         github_token: ${{ inputs.github_token }}
         commit_owner: ${{ inputs.commit_owner }}
