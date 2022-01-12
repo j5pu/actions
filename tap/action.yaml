@@ -199,6 +199,8 @@ runs:
     - name: "Repository: description"
       id: DESCRIPTION
       uses: j5pu/actions/description@main
+      with:
+        repository: ${{ inputs.homebrew_owner }}/homebrew-${{ inputs.homebrew_tap }}
       if: ${{ env.README == '0' }}
 
     - name: "README.md: create"

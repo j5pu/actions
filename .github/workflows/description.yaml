@@ -1,4 +1,4 @@
-name: id
+name: description
 
 on:
   workflow_dispatch:
