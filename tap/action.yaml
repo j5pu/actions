@@ -73,6 +73,8 @@ runs:
 
     - name: "Create Formula"
       run: |
+        pwd 
+        ls
         if [ ! -d ${{ inputs.formula_folder }} ]; then 
           mkdir ${{ inputs.formula_folder }}
           git add ${{ inputs.formula_folder }}
