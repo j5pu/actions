@@ -45,7 +45,7 @@ runs:
       id: OUTPUT
       run: |
         PYTHON=true
-        [ -f setup.cfg ] || PYTHON=true
+        [ -f setup.cfg ] || PYTHON=false
         echo '::echo::on'
         echo "::set-output name=PYTHON::${PYTHON}"
       shell: bash
