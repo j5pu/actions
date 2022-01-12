@@ -76,6 +76,10 @@ runs:
         fetch-depth: 0
         token: ${{ env.GITHUB_TOKEN }}
 
+    - name: "LICENSE"
+      run: test -f LICENSE
+      shell: bash
+
     - name: "Git: config"
       run: |
         git config --global user.email "${{ inputs.commit_email }}"
