@@ -9,7 +9,7 @@ inputs:
   keep:
     description: 'Release: keep'
     required: false
-    default: '3'
+    default: '4'
 
   release:
     description: 'Release: create'
@@ -84,10 +84,22 @@ runs:
         echo "::set-output name=PREFIX::${PREFIX}"
       shell: bash
 
+    - name: "Latest: remove"
+      run: |
+        gh release delete latest --yes --repo ${{github.repository}} 2>/dev/null || true
+        git tag -d latest 2>/dev/null || true
+        git push --delete origin latest 2>/dev/null || true
+        git tag latest
+        git push origin latest
+      if: steps.VERSION.outputs.CHANGED == 'true'
+      shell: bash
+
     - name: "Tag & push"
       run: |
         git tag ${{ steps.VERSION.outputs.NEXT }}
         git push origin ${{ steps.VERSION.outputs.NEXT }}
+        git tag latest
+        git push origin latest
       if: steps.VERSION.outputs.CHANGED == 'true'
       shell: bash
 
@@ -96,6 +108,13 @@ runs:
       uses: softprops/action-gh-release@v1
       with:
         tag_name: ${{ steps.VERSION.outputs.NEXT }}
+      if: inputs.release == 'true' && steps.VERSION.outputs.CHANGED == 'true'
+
+    - name: "Latest: create"
+      id: create
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: latest
       if: inputs.release == 'true' && steps.VERSION.outputs.CHANGED == 'true'
 
     - name: "Release: delete"

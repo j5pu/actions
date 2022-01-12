@@ -9,7 +9,6 @@ inputs:
   commit_email:
     description: "Git author info used to commit to the homebrew tap."
     required: false
-    default: ${{ github.event.schedule.user.id }}+${{ github.workflow }}@users.noreply.github.com
 
   commit_owner:
     description: "Git author info used to commit to the homebrew tap."
@@ -71,10 +70,24 @@ runs:
       run: test -f LICENSE
       shell: bash
 
+    - id: ID
+      uses: j5pu/actions/id@main
+      if: ${{ inputs.commit_email }} = ''
+
+    - name: "Commit: email"
+      run: echo "EMAIL=${{ steps.ID.outputs.ID }}+${{ github.workflow }}@users.noreply.github.com" >> $GITHUB_ENV
+      shell: bash
+      if: ${{ inputs.commit_email }} = ''
+
+    - name: "Commit: email"
+      run: echo "EMAIL=${{ inputs.commit_email }}" >> $GITHUB_ENV
+      shell: bash
+      if: ${{ inputs.commit_email }} != ''
+
     - name: "GitHub: token"
       run: echo "GITHUB_TOKEN=${{ inputs.github_token }}" >> $GITHUB_ENV
       shell: bash
-      if: ${{ inputs.github_token }}
+      if: ${{ inputs.github_token }} != ''
 
     - uses: actions/checkout@v2
       with:
@@ -84,7 +97,7 @@ runs:
 
     - name: "Git: config"
       run: |
-        git config --global user.email "${{ inputs.commit_email }}"
+        git config --global user.email "${{ env.EMAIL }}"
         git config --global user.name "${{ inputs.commit_owner }}"
       shell: bash
 
@@ -119,13 +132,25 @@ runs:
         formula_folder: ${{ inputs.formula_folder }}
         github_token: ${{ env.GITHUB_TOKEN }}
         commit_owner: ${{ inputs.commit_owner }}
-        commit_email: ${{ inputs.commit_email }}
+        commit_email: ${{ env.EMAIL }}
         depends_on: ${{ inputs.depends_on }}
         install: ${{ inputs.install }}
         test: ${{ inputs.test }}
         skip_commit: ${{ inputs.skip_commit }}
         update_readme_table: ${{ inputs.update_readme_table }}
         debug: ${{ inputs.debug }}
+
+    - uses: actions/checkout@v2
+      with:
+        repository: ${{ inputs.homebrew_owner }}/homebrew-${{ inputs.homebrew_tap }}
+        fetch-depth: 0
+        token: ${{ env.GITHUB_TOKEN }}
+
+    - name: "Git: config"
+      run: |
+        git config --global user.email "${{ env.EMAIL }}"
+        git config --global user.name "${{ inputs.commit_owner }}"
+      shell: bash
 
     - name: "Formula: workflow"
       run: |
