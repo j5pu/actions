@@ -48,7 +48,6 @@ jobs:
       - id: ID
         uses: j5pu/actions/id@main
       - run: echo ${{ steps.ID.outputs.ID }}
-
 ```
 
 ## [pypi](pypi)
