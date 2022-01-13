@@ -12,24 +12,17 @@ inputs:
     default: ${{ github.repository }}
 
 outputs:
-  DESCRIPRION:
+  DESCRIPTION:
     description: "GitHub: description"
-    value: ${{ steps.DESCRIPRION.outputs.DESCRIPRION }}
+    value: ${{ steps.DESCRIPTION.outputs.DESCRIPTION }}
 
 runs:
   using: "composite"
   steps:
-      - run: |
-          description="$(curl -fsL -H "Accept: application/vnd.github.v3+json" \
-            -H 'Authorization: token ${{ github.token }}' \
-            https://api.github.com/repos/${{ inputs.repository }} | jq -r .description)"
-          echo "${description}"
-        shell: bash
-
       - name: "GitHub: description"
-        id: DESCRIPRION
+        id: DESCRIPTION
         run: |
-          echo "::set-output name=DESCRIPRION::$(curl -fsL -H "Accept: application/vnd.github.v3+json" \
+          echo "::set-output name=DESCRIPTION::$(curl -fsL -H "Accept: application/vnd.github.v3+json" \
            -H 'Authorization: token ${{ github.token }}' \
            https://api.github.com/repos/${{ inputs.repository }} | jq -r .description)"
         shell: bash
