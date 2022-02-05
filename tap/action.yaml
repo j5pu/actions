@@ -397,8 +397,6 @@ runs:
                   fetch-depth: 0
               - name: Set up Homebrew
                 uses: Homebrew/actions/setup-homebrew@master
-              - name: Uninstall bats
-                run: brew uninstall bats
               - name: "Bundle: install"
                 run: brew bundle --quiet --no-lock
         
@@ -439,8 +437,6 @@ runs:
                   fetch-depth: 0
               - name: Set up Homebrew
                 uses: Homebrew/actions/setup-homebrew@master
-              - name: Uninstall bats
-                run: brew uninstall bats
               - name: "${{ github.event.repository.name }}: audit"
                 run: sh -c 'brew audit --new --git --formula Formula/${{ github.event.repository.name }}.rb || true'
               - name: "${{ github.event.repository.name }}: tap"
