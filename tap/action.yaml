@@ -300,9 +300,10 @@ runs:
         echo 'tap "${{ inputs.homebrew_owner }}/${{ inputs.homebrew_tap }}"' > /tmp/Brewfile
         
         while read -r formula; do
-          echo "brew \"${{ inputs.homebrew_owner }}/${{ inputs.homebrew_tap }}/${formula}\"" >> /tmp/Brewfile
-        done < <(find Formula -type f -name "*.rb" -exec basename {} .rb \;)
- 
+          echo "brew \"${{ inputs.homebrew_owner }}/${{ inputs.homebrew_tap }}/${formula}\"" >> /tmp/Formulas
+        done < <(find Formula -type f -name "*.rb" -exec basename {} .rb \; | sort)
+        cat /tmp/Formulas >> /tmp/Brewfile
+        
         echo >> /tmp/Brewfile
         
         if ! cmp --quiet /tmp/Brewfile Brewfile; then
