@@ -467,6 +467,8 @@ runs:
     
     - name: "Commit and push if changes"
       run: |
+        cd end
+
         if [ "${CHANGED-}" = '1' ]; then
           git add .
           git commit -a -m "${MSG:-fix}: ${{ github.event.repository.name }}"
