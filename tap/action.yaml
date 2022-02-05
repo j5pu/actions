@@ -92,6 +92,9 @@ runs:
           email=${{ inputs.commit_email }}
         fi
         echo "EMAIL=${email}" >> $GITHUB_ENV
+
+        echo 'MATRIX_LANGUAGE={{ matrix.language }}' >> $GITHUB_ENV
+        echo 'MATRIX_OS={{ matrix.os }}' >> $GITHUB_ENV
       shell: bash
 
     - name: "Git: config"
@@ -328,7 +331,7 @@ runs:
      
         file=.github/workflows/codeql-analysis.yaml
 
-        cat > /tmp/file <<'EOF'
+        cat > /tmp/file <<EOF
         name: "CodeQL"
 
         on:
@@ -359,7 +362,7 @@ runs:
             - name: Initialize CodeQL
               uses: github/codeql-action/init@v1
               with:
-                languages: \${{ matrix.language }}
+                languages: \$${MATRIX_LANGUAGE}
             - name: Autobuild
               uses: github/codeql-action/autobuild@v1
         
@@ -383,7 +386,7 @@ runs:
      
         file=.github/workflows/main.yaml
 
-        cat > /tmp/file <<'EOF'
+        cat > /tmp/file <<EOF
         name: main
         
         on: 
@@ -394,7 +397,7 @@ runs:
         
         jobs:
           main:
-            runs-on: \${{ matrix.os }}
+            runs-on: \$${MATRIX_OS}
             strategy: 
               matrix:
                 os: [macos-latest, ubuntu-latest]
@@ -424,7 +427,6 @@ runs:
         
         file=.github/workflows/${{ github.event.repository.name }}.yaml
         
-        matrix='\${{ matrix.os }}'
         cat > /tmp/file <<EOF
         name: ${{ github.event.repository.name }}
         
@@ -436,7 +438,7 @@ runs:
         
         jobs:
           ${{ github.event.repository.name }}:
-            runs-on: "$matrix"
+            runs-on: \$${MATRIX_OS}
             strategy: 
               matrix:
                 os: [macos-latest, ubuntu-latest]
