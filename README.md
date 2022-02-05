@@ -365,3 +365,19 @@ jobs:
         uses: j5pu/actions/tap@main
         if: steps.TAG.outputs.CHANGED == 'true'
 ```
+
+## Example: matrix
+
+```yaml
+jobs:
+  main:
+    runs-on: ${{ matrix.os}}
+    strategy: 
+      matrix:
+        os: [macos-latest, ubuntu-latest]
+        node: [3.9, 3.10]
+    steps:
+      - uses: actions/setup-node@v1
+        with:
+          python-version: ${{ matrix.python }}
+```
