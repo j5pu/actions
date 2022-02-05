@@ -30,6 +30,10 @@ inputs:
     default: '3.9'
 
 outputs:
+  PACKAGE:
+    description: "Python: package name"
+    value: ${{ steps.OUTPUT.outputs.PACKAGE }}
+    
   PYTHON:
     description: "Python: setup.cfg"
     value: ${{ steps.OUTPUT.outputs.PYTHON }}
@@ -47,6 +51,7 @@ runs:
         PYTHON=true
         [ -f setup.cfg ] || PYTHON=false
         echo '::echo::on'
+        echo "::set-output name=PACKAGE::$(awk -F '[= ]' '/^name = / { print $4 }' setup.cfg)"
         echo "::set-output name=PYTHON::${PYTHON}"
       shell: bash
 
@@ -75,6 +80,14 @@ runs:
       with:
         password: ${{ inputs.pypi_token }}
       if: ${{!github.event.repository.private}} && steps.OUTPUT.outputs.PYTHON == 'true'
+
+    - name: "Install package to clean cache in pypi.org"
+      run: |
+        sudo python -m pip install --upgrade --no-cache ${{ steps.OUTPUT.outputs.PACKAGE }}
+      shell: bash
+      env:
+        PYTHONWARNINGS: ignore
+      if: steps.OUTPUT.outputs.PYTHON == 'true'
 
     - uses: j5pu/actions/pypirm@main
       with:
