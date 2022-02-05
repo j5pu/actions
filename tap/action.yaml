@@ -359,7 +359,7 @@ runs:
             - name: Initialize CodeQL
               uses: github/codeql-action/init@v1
               with:
-                languages: ${{ matrix.language }}
+                languages: \${{ matrix.language }}
             - name: Autobuild
               uses: github/codeql-action/autobuild@v1
         
@@ -394,7 +394,7 @@ runs:
         
         jobs:
           main:
-            runs-on: ${{ matrix.os}}
+            runs-on: \${{ matrix.os}}
             strategy: 
               matrix:
                 os: [macos-latest, ubuntu-latest]
@@ -435,7 +435,7 @@ runs:
         
         jobs:
           ${{ github.event.repository.name }}:
-            runs-on: ${{ matrix.os}}
+            runs-on: \${{ matrix.os}}
             strategy: 
               matrix:
                 os: [macos-latest, ubuntu-latest]
