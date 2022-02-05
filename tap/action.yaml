@@ -110,7 +110,7 @@ runs:
     - name: ".gitignore: create"
       run: |
         cd start
-        
+
         cat > /tmp/file <<EOF
         ### macOS template
         .DS_Store
@@ -177,6 +177,7 @@ runs:
         EOF
         
         if ! cmp --quiet /tmp/file .gitignore; then
+          echo "CHANGED=1" >> $GITHUB_ENV
           mv /tmp/file .gitignore
           git add .gitignore
           git commit -a -m .gitignore
@@ -219,6 +220,8 @@ runs:
             echo
           } > README.md
         
+          echo "CHANGED=1" >> $GITHUB_ENV
+
           git add README.md
           git commit -a -m README.md
           git push 
@@ -241,6 +244,8 @@ runs:
             echo
           } >> README.md
         
+          echo "CHANGED=1" >> $GITHUB_ENV
+
           git commit -a -m "README.md: template"
           git push 
         fi
@@ -255,6 +260,7 @@ runs:
         file=${{ inputs.formula_folder }}/${{ github.event.repository.name }}.rb
         
         if [ ! -f ${file} ]; then
+          echo "CHANGED=1" >> $GITHUB_ENV
           mkdir -p ${{ inputs.formula_folder }}
           touch ${file}
           git add ${file}
@@ -308,10 +314,8 @@ runs:
         echo >> /tmp/Brewfile
         
         if ! cmp --quiet /tmp/Brewfile Brewfile; then
+          echo "CHANGED=1" >> $GITHUB_ENV
           mv /tmp/Brewfile Brewfile
-          git add Brewfile
-          git commit -a -m "Brewfile"
-          git push
         fi
         
         cd -
@@ -365,10 +369,8 @@ runs:
         EOF
  
         if ! cmp --quiet /tmp/file ${file}; then
+          echo "CHANGED=1" >> $GITHUB_ENV
           mv /tmp/file ${file}
-          git add ${file}
-          git commit -a -m "workflow: ${file}"
-          git push
         fi
         
         cd -
@@ -405,10 +407,8 @@ runs:
         EOF
  
         if ! cmp --quiet /tmp/file ${file}; then
+          echo "CHANGED=1" >> $GITHUB_ENV
           mv /tmp/file ${file}
-          git add ${file}
-          git commit -a -m "workflow: main"
-          git push
         fi
         
         cd -
@@ -455,18 +455,25 @@ runs:
         EOF
         
         msg=fix
-        [ -f ${file} ] || msg=feat
+        [ -f ${file} ] || echo "MSG=feat" >> $GITHUB_ENV
         
         if ! cmp --quiet /tmp/file ${file}; then
+          echo "CHANGED=1" >> $GITHUB_ENV
           mv /tmp/file ${file}
-          git add ${file}
-          git commit -a -m "${msg}: ${{ github.event.repository.name }}"
-          git push 
         fi
         
         cd -
       shell: bash
-
+    
+    - name: "Commit and push if changes"
+      run: |
+        if [ "${CHANGED-}" = '1' ]; then
+          git add .
+          git commit -a -m "${MSG:-fix}: ${{ github.event.repository.name }}"
+          git push
+        fi
+      shell: bash
+      
     - run: rm -rf $GITHUB_WORKSPACE/*
       shell: bash
 
