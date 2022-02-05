@@ -328,7 +328,7 @@ runs:
      
         file=.github/workflows/codeql-analysis.yaml
 
-        cat > /tmp/file <<EOF
+        cat > /tmp/file <<'EOF'
         name: "CodeQL"
 
         on:
@@ -359,7 +359,7 @@ runs:
             - name: Initialize CodeQL
               uses: github/codeql-action/init@v1
               with:
-                languages: \${{ matrix.language }}
+                languages: ${{ matrix.language }}
             - name: Autobuild
               uses: github/codeql-action/autobuild@v1
         
@@ -383,7 +383,7 @@ runs:
      
         file=.github/workflows/main.yaml
 
-        cat > /tmp/file <<EOF
+        cat > /tmp/file <<'EOF'
         name: main
         
         on: 
@@ -394,7 +394,7 @@ runs:
         
         jobs:
           main:
-            runs-on: \${{ matrix.os}}
+            runs-on: ${{ matrix.os }}
             strategy: 
               matrix:
                 os: [macos-latest, ubuntu-latest]
@@ -423,7 +423,8 @@ runs:
         mkdir -p .github/workflows
         
         file=.github/workflows/${{ github.event.repository.name }}.yaml
-
+        
+        matrix='${{ matrix.os }}'
         cat > /tmp/file <<EOF
         name: ${{ github.event.repository.name }}
         
@@ -435,7 +436,7 @@ runs:
         
         jobs:
           ${{ github.event.repository.name }}:
-            runs-on: \${{ matrix.os}}
+            runs-on: ${matrix}
             strategy: 
               matrix:
                 os: [macos-latest, ubuntu-latest]
