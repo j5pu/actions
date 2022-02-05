@@ -338,6 +338,9 @@ runs:
           push:
             tags:
               - '**'
+          release:
+            types:
+              - '!**'
           schedule:
             - cron: '32 4 * * 3'
         
@@ -393,6 +396,9 @@ runs:
           push:
             tags:
               - '**'
+          release:
+            types:
+              - '!**'
           workflow_dispatch:
         
         jobs:
@@ -434,6 +440,9 @@ runs:
           push:
             tags:
               - '**'
+          release:
+            types:
+              - '!**'
           workflow_dispatch:
         
         jobs:
