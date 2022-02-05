@@ -83,13 +83,15 @@ runs:
 
     - name: "Install package to clean cache in pypi.org"
       run: |
+        sudo python -m pip uninstall ${{ steps.OUTPUT.outputs.PACKAGE }} || true
         sudo python -m pip install --upgrade --no-cache ${{ steps.OUTPUT.outputs.PACKAGE }}
       shell: bash
       env:
         PYTHONWARNINGS: ignore
       if: steps.OUTPUT.outputs.PYTHON == 'true'
 
-    - uses: j5pu/actions/pypirm@main
+    - name: "Remove distributions 📦 from PyPI"
+      uses: j5pu/actions/pypirm@main
       with:
         keep: ${{ inputs.keep }}
         pypi_password: ${{ inputs.pypi_password }}
