@@ -436,7 +436,7 @@ runs:
         
         jobs:
           ${{ github.event.repository.name }}:
-            runs-on: ${matrix}
+            runs-on: "$matrix"
             strategy: 
               matrix:
                 os: [macos-latest, ubuntu-latest]
