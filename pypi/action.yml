@@ -80,19 +80,7 @@ runs:
       with:
         password: ${{ inputs.pypi_token }}
       if: ${{!github.event.repository.private}} && steps.OUTPUT.outputs.PYTHON == 'true'
-
-    - name: "Install package to clean cache in pypi.org"
-      run: |
-        sudo python -m pip uninstall ${{ steps.OUTPUT.outputs.PACKAGE }} || true
-        sleep 3
-        sudo python -m pip install --upgrade --no-cache ${{ steps.OUTPUT.outputs.PACKAGE }} || true
-        sleep 3
-        sudo python -m pip install --upgrade --no-cache ${{ steps.OUTPUT.outputs.PACKAGE }} || true
-      shell: bash
-      env:
-        PYTHONWARNINGS: ignore
-      if: steps.OUTPUT.outputs.PYTHON == 'true'
-
+      
     - name: "Remove distributions 📦 from PyPI"
       uses: j5pu/actions/pypirm@main
       with:
