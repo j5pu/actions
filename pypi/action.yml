@@ -69,7 +69,7 @@ runs:
 
     - name: "Build a binary wheel and a source tarball"
       run: |
-        python -m build --sdist --wheel --config-setting "verbose=0" --outdir dist/ .
+        python -m build --wheel --config-setting "verbose=0" --outdir dist/ .
       shell: bash
       env:
         PYTHONWARNINGS: ignore
