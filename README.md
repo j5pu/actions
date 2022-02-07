@@ -1,6 +1,6 @@
 # actions
 
-[![Build Status](https://github.com/j5pu/actions/workflows/pypi/badge.svg)](https://github.com/j5pu/actions/actions)
+[![Build Status](https://github.com/j5pu/actions/workflows/tag/badge.svg)](https://github.com/j5pu/actions/actions)
 
 ## [description](description)
 
