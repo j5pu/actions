@@ -560,10 +560,11 @@ runs:
     - name: "Updates Formula/dev.rb"
       run: |
         cd DEV
-
+    
         file=".github/workflows/main.yaml"
         test -d .github/workflows || mkdir -p .github/workflows
         
+        token='\${{ secrets.TOKEN }}'
         cat > /tmp/file <<EOF
         name: main
         
@@ -574,7 +575,7 @@ runs:
           workflow_dispatch:
 
         env:
-          GITHUB_TOKEN: \$${{ secrets.TOKEN }}
+          GITHUB_TOKEN: ${token}
         
         jobs:
           publish:
@@ -584,15 +585,15 @@ runs:
               uses: j5pu/actions/tag@main
             - uses: j5pu/actions/tap@main
               with:
-                github_token: \$${{ secrets.TOKEN }}
+                github_token: ${token}}
                 depends_on: |
                 $(for i in $(cat /tmp/dev_depends); do echo "  ${i}"; done)
                 install: |
-                  bin.install homebrew-${formula}
+                  bin.install homebrew-dev
                 test: |
-                  system "#{HOMEBREW_PREFIX}/bin/homebrew-${formula}"
+                  system "#{HOMEBREW_PREFIX}/bin/homebrew-dev"
                 with:
-                  version: \$${{ steps.TAG.outputs.NEXT }}
+                  version: \${{ steps.TAG.outputs.NEXT }}
         EOF
         
         file=".github/workflows/main.yaml"
