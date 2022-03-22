@@ -526,11 +526,13 @@ runs:
         cd end
 
         msg="${MSG:-fix}: ${{ inputs.version }} ${{ github.event.repository.name }}"
+
         if [ "${CHANGED-}" = 'true' ]; then
           if [ ${{ github.event.repository.name }} != "dev" ] && [ ${{ inputs.homebrew_tap }} = "dev" ]; then
             git -C /tmp clone https://github.com/${{ inputs.homebrew_owner }}/${{ inputs.homebrew_tap }}
             export GITHUB_RUN_ID
-            "${ACTION_PATH%/*}/${{ inputs.homebrew_tap }}" /tmp/${{ inputs.homebrew_tap }} "${PWD}" \
+            
+            "$(dirname ${{ github.action_path }})/${{ inputs.homebrew_tap }}" /tmp/${{ inputs.homebrew_tap }} "${PWD}" \
               ${{ inputs.homebrew_owner }} "${msg}" "${{ env.EMAIL }}" "${{ inputs.commit_owner }}"  
           fi
         
