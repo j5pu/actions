@@ -67,21 +67,17 @@ inputs:
     default: ""
 
 outputs:
-  DEV_DEPENDS:
-    description: "All depends on for 'dev' Tap"
-    value: ${{ steps.SHA.outputs.DEV_DEPENDS }}
-
   SHA_CHANGED:
     description: "Formula SHA: changed"
-    value: ${{ steps.SHA.outputs.CHANGED }}
+    value: ${{ steps.DEPENDS.outputs.SHA_CHANGED }}
 
   SHA_CURRENT:
     description: "Formula SHA-1: current"
-    value: ${{ steps.SHA.outputs.CURRENT }}
+    value: ${{ steps.DEPENDS.outputs.SHA_CURRENT }}
 
   SHA_NEXT:
     description: "Formula SHA-1: next"
-    value: ${{ steps.SHA.outputs.NEXT }}
+    value: ${{ steps.DEPENDS.outputs.SHA_NEXT }}
 
 runs:
   using: "composite"
@@ -91,7 +87,7 @@ runs:
       shell: bash
       if: ${{ inputs.github_token }} != ''
 
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         path: actions
         token: ${{ env.GITHUB_TOKEN }}
@@ -125,7 +121,7 @@ runs:
         git config --global user.name "${{ inputs.commit_owner }}"
       shell: bash
 
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         path: start
         repository: ${{ inputs.homebrew_owner }}/homebrew-${{ inputs.homebrew_tap }}
@@ -320,17 +316,17 @@ runs:
     - run: sudo rm -rf $GITHUB_WORKSPACE/*
       shell: bash
 
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
-        path: tap
+        path: TAP
         repository: ${{ inputs.homebrew_owner }}/homebrew-${{ inputs.homebrew_tap }}
         fetch-depth: 0
         token: ${{ env.GITHUB_TOKEN }}
 
-    - name: "SHA"
-      id: SHA
+    - name: "Tap Depends"
+      id: DEPENDS
       run: |
-        cd tap
+        cd TAP
         
         SHA_CHANGED=false
         PREFIX='v'
@@ -341,21 +337,23 @@ runs:
           echo "CHANGED=true" >> $GITHUB_ENV
         fi
         
-        DEV_DEPENDS="$(find "${{ inputs.formula_folder }}" -type f -name "*.rb" -not -name "dev.rb"\
-          -exec basename "{}" .rb \; | sed "s|^|\"${{ inputs.homebrew_owner }}/${{ inputs.homebrew_tap }}/|g;s|$|\"|g")"
-        echo "DEV_DEPENDS=${DEV_DEPENDS}" >> $GITHUB_ENV
+        find "${{ inputs.formula_folder }}" -type f -name "*.rb" -not -name "dev.rb" -exec basename "{}" .rb \; \
+          | sed "s|^|\"${{ inputs.homebrew_owner }}/${{ inputs.homebrew_tap }}/|g;s|$|\"|g")" >/tmp/dev_depends
         
+        cat /tmp/dev_depends
+
         echo '::echo::on'
         echo "::set-output name=DEV_DEPENDS::${DEV_DEPENDS}"
         echo "::set-output name=SHA_CHANGED::${SHA_CHANGED}"
         echo "::set-output name=SHA_CURRENT::${SHA_CURRENT}"
         echo "::set-output name=SHA_NEXT::${SHA_NEXT}"
 
+        cd -
       shell: bash
 
     - name: "Formula: Brewfile"
       run: |
-        cd tap
+        cd TAP
 
         echo 'tap "${{ inputs.homebrew_owner }}/${{ inputs.homebrew_tap }}"' > /tmp/Brewfile
         
@@ -376,7 +374,7 @@ runs:
 
     - name: "Workflow: codeql"
       run: |
-        cd tap
+        cd TAP
         mkdir -p .github/workflows
      
         file=.github/workflows/codeql-analysis.yaml
@@ -410,7 +408,7 @@ runs:
         
             steps:
             - name: Checkout repository
-              uses: actions/checkout@v2
+              uses: actions/checkout@v3
         
             - name: Initialize CodeQL
               uses: github/codeql-action/init@v1
@@ -434,7 +432,7 @@ runs:
 
     - name: "Bundle: workflow"
       run: |
-        cd tap
+        cd TAP
         mkdir -p .github/workflows
      
         file=.github/workflows/main.yaml
@@ -458,7 +456,7 @@ runs:
               matrix:
                 os: [macos-latest, ubuntu-latest]
             steps:
-              - uses: actions/checkout@v2
+              - uses: actions/checkout@v3
                 with:
                   fetch-depth: 0
               - name: Set up Homebrew
@@ -478,7 +476,7 @@ runs:
 
     - name: "Formula: workflow"
       run: |
-        cd tap
+        cd TAP
         mkdir -p .github/workflows
         
         file=".github/workflows/${{ github.event.repository.name }}.yaml"
@@ -502,7 +500,7 @@ runs:
               matrix:
                 os: [macos-latest, ubuntu-latest]
             steps:
-              - uses: actions/checkout@v2
+              - uses: actions/checkout@v3
                 with:
                   fetch-depth: 0
               - name: Set up Homebrew
@@ -535,7 +533,7 @@ runs:
     
     - name: "Commit and push if changes"
       run: |
-        cd tap
+        cd TAP
 
         msg="${MSG:-fix}: ${{ inputs.version }} ${{ github.event.repository.name }}"
 
@@ -543,37 +541,60 @@ runs:
         git add .
         git commit --quiet -a -m "${msg}" || true
         git push --quiet
+        
+        cd -
       shell: bash
       if: env.CHANGED == 'true'
 
     - run: rm -rf $GITHUB_WORKSPACE/*
       shell: bash
-    # TODO: AQUI LO DEJO CON EL PUTO DEV_DEPENDS, puedo quitar el SHA y llamar a la
-    #   tarea dev depends y actualizarlo aqui que ya esta el checkout y marcar el CHANGED...
 
     - uses: actions/checkout@v3
       with:
-        path: dev
+        path: DEV
         repository: ${{ inputs.homebrew_owner }}/${{ inputs.homebrew_tap }}
-        fetch-depth: 0
-        token: ${{ env.GITHUB_TOKEN }}
-      if: env.CHANGED == 'true' && github.event.repository.name != 'dev' && inputs.homebrew_tap == 'dev'
-
-    - uses: actions/checkout@v3
-      with:
-        path: tap
-        repository: ${{ inputs.homebrew_owner }}/homebrew-${{ inputs.homebrew_tap }}
         fetch-depth: 0
         token: ${{ env.GITHUB_TOKEN }}
       if: env.CHANGED == 'true' && github.event.repository.name != 'dev' && inputs.homebrew_tap == 'dev'
 
     - name: "Updates Formula/dev.rb"
       run: |
-        cd dev
+        cd DEV
 
-        if "${{ github.action_path }}/${{ inputs.homebrew_tap }}" "${{ inputs.homebrew_owner }}" \
-          | grep -q "^Changed:"; then
+        file=".github/workflows/main.yaml"
+        test -d .github/workflows || mkdir -p .github/workflows
+        
+        cat > /tmp/file <<EOF
+        name: main
+        
+        on: 
+          push:
+            branches:
+              - '**'
+          workflow_dispatch:
+        
+        jobs:
+          publish:
+            runs-on: ubuntu-latest
+          steps:
+            - id: TAG
+              uses: j5pu/actions/tag@main
+            - uses: j5pu/actions/tap@main
+              with:
+                github_token: \${{ secrets.TOKEN }}
+                depends_on: |
+                $(for i in $(cat /tmp/dev_depends); do echo "  ${i}"; done)
+                install: |
+                  bin.install homebrew-${formula}
+                test: |
+                  system "#{HOMEBREW_PREFIX}/bin/homebrew-${formula}"
+        EOF
+        
+        file=".github/workflows/main.yaml"
+        
+        if ! cmp --quiet /tmp/file "${file}"; then
           echo "CHANGED=true" >> $GITHUB_ENV
+          mv /tmp/file "${file}"
           git add .
           git commit --quiet -a -m "${MSG}"
           git push --quiet
