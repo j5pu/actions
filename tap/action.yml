@@ -534,6 +534,8 @@ runs:
             export GITHUB_TOKEN
             "${{ github.action_path }}/${{ inputs.homebrew_tap }}" /tmp/${{ inputs.homebrew_tap }} "${PWD}" \
               ${{ inputs.homebrew_owner }} "${msg}" "${{ env.EMAIL }}" "${{ inputs.commit_owner }}"  
+     
+            git -C /tmp/${{ inputs.homebrew_tap }} push --quiet
           fi
         
           git add .

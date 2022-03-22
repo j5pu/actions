@@ -58,7 +58,6 @@ EOF
     git config --global user.name "$6"
     git add .github/workflows/main.yaml
     git commit --quiet -a -m "$4"
-    git push --quiet
   fi
 }
 
