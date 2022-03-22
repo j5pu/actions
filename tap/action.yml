@@ -346,7 +346,6 @@ runs:
         cat /tmp/dev_depends
 
         echo '::echo::on'
-        echo "::set-output name=DEV_DEPENDS::${DEV_DEPENDS}"
         echo "::set-output name=SHA_CHANGED::${SHA_CHANGED}"
         echo "::set-output name=SHA_CURRENT::${SHA_CURRENT}"
         echo "::set-output name=SHA_NEXT::${SHA_NEXT}"
