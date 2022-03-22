@@ -29,9 +29,6 @@ on:
       - '**'
   workflow_dispatch:
 
-env:
-  GITHUB_TOKEN: \${{ secrets.TOKEN }}
-
 jobs:
   publish:
     needs: test
