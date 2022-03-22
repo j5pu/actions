@@ -12,9 +12,11 @@ shopt -s inherit_errexit
 #  None
 #######################################
 workflow() {
-  local depends formula="${0##*/}" tmp
+  local depends formula="${0##*/}" repo="homebrew-${formula}" tmp
   cd "$1"
-  depends="$(find "${2}/Formula" -type f -name "*.rb" -not -name "${formula}.rb"\
+  git -C /tmp clone --quiet "https://github.com/${repo}"
+
+  depends="$(find "/tmp/${repo}/Formula" -type f -name "*.rb" -not -name "${formula}.rb"\
     -exec basename "{}" .rb \; | sed "s|^|\"${3}/${formula}/|g;s|$|\"|g")"
     
   cd "$(git rev-parse --show-toplevel)"
@@ -52,12 +54,8 @@ $(for i in ${depends}; do echo "            ${i}"; done)
 
 EOF
   if ! cmp --quiet "${tmp}" .github/workflows/main.yaml 2>/dev/null; then
-    >&2 echo Changed: "${PWD}/.github/workflows/main.yaml"
+    echo Changed: "${PWD}/.github/workflows/main.yaml"
     mv "${tmp}" .github/workflows/main.yaml
-    git config --global user.email "$5"
-    git config --global user.name "$6"
-    git add .github/workflows/main.yaml
-    git commit --quiet -a -m "$4"
   fi
 }
 
@@ -67,9 +65,6 @@ EOF
 #  1    dev repository path
 #  2    homebrew-dev repository path
 #  3    tap owner
-#  4    message
-#  5    email
-#  6    name
 #######################################
 main() {
   [ "${GITHUB_RUN_ID-}" ] || exit 0
