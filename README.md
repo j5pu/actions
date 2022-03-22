@@ -271,6 +271,7 @@ Inputs:
 * *skip_commit* (default: false)
 * *test* (default: `system "test", "-x", "#{name}"`)
 * *update_readme_table* (default: true)
+* *version* (default: "")
 
 The following will be done on the tap repository:
 * *Formula: create*: create empty formula file.
@@ -363,7 +364,8 @@ jobs:
         
       - name: "Tap"
         uses: j5pu/actions/tap@main
-        if: steps.TAG.outputs.CHANGED == 'true'
+        with:
+          version: ${{ steps.TAG.outputs.NEXT }}
 ```
 
 ## Example: matrix

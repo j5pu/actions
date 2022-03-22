@@ -61,6 +61,24 @@ inputs:
     required: false
     default: 'true'
 
+  version:
+    description: "Version for commit message"
+    required: false
+    default: ""
+
+outputs:
+  CHANGED:
+    description: "Formula SHA: changed"
+    value: ${{ steps.SHA.outputs.CHANGED }}
+
+  CURRENT:
+    description: "Formula SHA-1: current"
+    value: ${{ steps.SHA.outputs.CURRENT }}
+
+  NEXT:
+    description: "Formula SHA-1: next"
+    value: ${{ steps.SHA.outputs.NEXT }}
+
 runs:
   using: "composite"
   steps:
@@ -180,7 +198,7 @@ runs:
         EOF
         
         if ! cmp --quiet /tmp/file .gitignore; then
-          echo "CHANGED=1" >> $GITHUB_ENV
+          echo "CHANGED=true" >> $GITHUB_ENV
           mv /tmp/file .gitignore
           git add .gitignore
           git commit -a -m .gitignore
@@ -223,7 +241,7 @@ runs:
             echo
           } > README.md
         
-          echo "CHANGED=1" >> $GITHUB_ENV
+          echo "CHANGED=true" >> $GITHUB_ENV
 
           git add README.md
           git commit -a -m README.md
@@ -247,7 +265,7 @@ runs:
             echo
           } >> README.md
         
-          echo "CHANGED=1" >> $GITHUB_ENV
+          echo "CHANGED=true" >> $GITHUB_ENV
 
           git commit -a -m "README.md: template"
           git push 
@@ -263,7 +281,7 @@ runs:
         file=${{ inputs.formula_folder }}/${{ github.event.repository.name }}.rb
         
         if [ ! -f ${file} ]; then
-          echo "CHANGED=1" >> $GITHUB_ENV
+          echo "CHANGED=true" >> $GITHUB_ENV
           mkdir -p ${{ inputs.formula_folder }}
           touch ${file}
           git add ${file}
@@ -275,6 +293,9 @@ runs:
       shell: bash
 
     - run: rm -rf $GITHUB_WORKSPACE/*
+      shell: bash
+
+    - run: echo "CURRENT_SHA=$(git rev-parse --verify HEAD)" >> $GITHUB_ENV
       shell: bash
 
     - name: "Formula: release"
@@ -292,6 +313,20 @@ runs:
         skip_commit: ${{ inputs.skip_commit }}
         update_readme_table: ${{ inputs.update_readme_table }}
         debug: ${{ inputs.debug }}
+
+    - name: "SHA"
+      id: SHA
+      run: |
+        CHANGED=false
+        PREFIX='v'
+        NEXT_SHA="$(git rev-parse --verify HEAD)" 
+        echo "NEXT_SHA=${NEXT_SHA}" >> $GITHUB_ENV
+        [ ${CURRENT_SHA} = ${NEXT_SHA} ] || { CHANGED=true; echo "CHANGED=true" >> $GITHUB_ENV; } 
+        echo '::echo::on'
+        echo "::set-output name=CHANGED::${CHANGED}"
+        echo "::set-output name=CURRENT::${CURRENT}"
+        echo "::set-output name=NEXT::${NEXT}"
+      shell: bash
 
     - run: sudo rm -rf $GITHUB_WORKSPACE/*
       shell: bash
@@ -317,7 +352,7 @@ runs:
         echo >> /tmp/Brewfile
         
         if ! cmp --quiet /tmp/Brewfile Brewfile; then
-          echo "CHANGED=1" >> $GITHUB_ENV
+          echo "CHANGED=true" >> $GITHUB_ENV
           mv /tmp/Brewfile Brewfile
         fi
         
@@ -375,7 +410,7 @@ runs:
         EOF
  
         if ! cmp --quiet /tmp/file ${file}; then
-          echo "CHANGED=1" >> $GITHUB_ENV
+          echo "CHANGED=true" >> $GITHUB_ENV
           mv /tmp/file ${file}
         fi
         
@@ -419,7 +454,7 @@ runs:
         EOF
  
         if ! cmp --quiet /tmp/file ${file}; then
-          echo "CHANGED=1" >> $GITHUB_ENV
+          echo "CHANGED=true" >> $GITHUB_ENV
           mv /tmp/file ${file}
         fi
         
@@ -473,10 +508,10 @@ runs:
         EOF
         
         msg=fix
-        [ -f ${file} ] || echo "MSG=feat" >> $GITHUB_ENV
+        [ -f ${file} ] || echo "MSG=feat: ${{ inputs.version }}  ${{ github.event.repository.name }}" >> $GITHUB_ENV
         
         if ! cmp --quiet /tmp/file ${file}; then
-          echo "CHANGED=1" >> $GITHUB_ENV
+          echo "CHANGED=true" >> $GITHUB_ENV
           mv /tmp/file ${file}
         fi
         
@@ -488,14 +523,15 @@ runs:
         set -x
         cd end
 
-        msg="${MSG:-fix}: ${{ github.event.repository.name }}"
-        if [ "${CHANGED-}" = '1' ]; then
+        msg="${MSG:-fix}: ${{ inputs.version }} ${{ github.event.repository.name }}"
+        if [ "${CHANGED-}" = 'true' ]; then
           if [ ${{ github.event.repository.name }} != "dev" ] && [ ${{ inputs.homebrew_tap }} = "dev" ]; then
             git -C /tmp clone https://github.com/${{ inputs.homebrew_owner }}/${{ inputs.homebrew_tap }}
             export GITHUB_RUN_ID
             "${ACTION_PATH%/*}/${{ inputs.homebrew_tap }}" /tmp/${{ inputs.homebrew_tap }} "${PWD}" \
-              ${{ inputs.homebrew_owner }} "${{ env.EMAIL }}" "${{ inputs.commit_owner }}"  
+              ${{ inputs.homebrew_owner }} "${msg}" "${{ env.EMAIL }}" "${{ inputs.commit_owner }}"  
           fi
+        
           git add .
           git commit --quiet -a -m "${msg}"
           git push --quiet
