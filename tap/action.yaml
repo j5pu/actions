@@ -498,9 +498,9 @@ runs:
             pushd /tmp
             git clone https://github.com/j5pu/${{ inputs.homebrew_tap }}
             cd ${{ inputs.homebrew_tap }}
-            mkdir -p .github.workflows
+            mkdir -p .github/workflows
         
-            cat > .github.workflows/main.yaml <<EOF
+            cat > .github/workflows/main.yaml <<EOF
         name: main
         
         on:
@@ -532,7 +532,7 @@ runs:
     
         EOF
             git add .github.workflows/main.yaml
-            git commit -a -m "${MSG:-fix}: ${{ github.event.repository.name }}" .github.workflows/main.yaml
+            git commit -a -m "${MSG:-fix}: ${{ github.event.repository.name }}" .github/workflows/main.yaml
             git push
             cd ~2
           fi
