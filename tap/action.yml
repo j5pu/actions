@@ -482,6 +482,7 @@ runs:
         cd TAP
         mkdir -p .github/workflows
         
+        identifier="$(echo ${{ github.event.repository.name }} | sed 's/./-/g')"
         file=".github/workflows/${{ github.event.repository.name }}.yaml"
         
         cat > /tmp/file <<EOF
@@ -497,7 +498,7 @@ runs:
           workflow_dispatch:
         
         jobs:
-          ${{ github.event.repository.name }}:
+          ${identifier}:
             runs-on: \$${MATRIX_OS}
             strategy: 
               matrix:
