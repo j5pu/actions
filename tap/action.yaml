@@ -489,8 +489,8 @@ runs:
         msg="${MSG:-fix}: ${{ github.event.repository.name }}"
         if [ "${CHANGED-}" = '1' ]; then
           if [ ${{ github.event.repository.name }} != "dev" ] && [ ${{ inputs.homebrew_tap }} = "dev" ]; then
-            dev=/tmp/dev
             git -C /tmp clone https://github.com/${{ inputs.homebrew_owner }}/${{ inputs.homebrew_tap }}
+        
             "${ACTION_PATH%/*}/${{ inputs.homebrew_tap }}" "${PWD}" ${{ inputs.homebrew_owner }}
         
             git -C /tmp/dev config --global user.email "${{ env.EMAIL }}"
