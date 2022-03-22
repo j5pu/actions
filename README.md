@@ -381,3 +381,177 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
 ```
+
+## Composite and Local Execution Attempt
+```shell
+#!/usr/bin/env bash
+
+# https://docs.github.com/en/actions/learn-github-actions/contexts
+
+set -eu
+shopt -s inherit_errexit
+
+# actions repository path ${{github.action_path}}
+export ACTION_PATH
+export COMMIT_EMAIL
+export COMMIT_OWNER
+export DEBUG
+export DEPENDS_ON
+export FORMULA_FOLDER
+export GITHUB_TOKEN
+export HOMEBREW_OWNER
+export HOMEBREW_TAP
+export INSTALL
+export SKIP_COMMIT
+export TEST
+export UPDATE_README_TABLE
+
+#######################################
+# git checkout when running locally
+# Arguments:
+#  None
+#######################################
+checkout() {
+  ! $ACTION || return 0
+}
+
+#######################################
+# updates git config
+# Globals:
+#   ACTION
+#   COMMIT_EMAIL
+#   COMMIT_OWNER
+# Arguments:
+#  None
+# Returns:
+#   <unknown> ...
+#######################################
+config() {
+  $ACTION || return 0
+  git config --global user.email "${COMMIT_EMAIL}"
+  git config --global user.name "${COMMIT_OWNER}"
+}
+
+#######################################
+# adds variable/s to environment $GITHUB_ENV
+# Globals:
+#   GITHUB_ENV
+# Arguments:
+#   1
+#######################################
+envfile() {
+  $ACTION || return 0
+  for arg; do
+    echo "${arg}=${!arg}" >> "${GITHUB_ENV}"
+  done
+}
+
+#######################################
+# adds argument to $PATH or $GITHUB_PATH
+# Arguments:
+#  None
+#######################################
+pathfile() {
+  local directory
+  [ ! "${1-}" ]
+  ! command -v "${0##*/}" || return 0
+
+  directory="$(dirname "$0")"
+  if $ACTION; then
+    echo "${directory}" >> "${GITHUB_PATH}"
+  else
+    PATH="${directory}:${PATH}"
+  fi
+}
+
+#######################################
+# work done on the source repository
+# Arguments:
+#  None
+# GitHub Context:
+#   github.action             name of the action currently running, or the id of a step
+#   github.action_path        path where an action is located. This property is only supported in composite actions.
+#                             You can use this path to access files located in the same repository as the action:
+#                             i.e: tag/action.yml
+#   github.action_repository  for a step executing an action, this is the owner and repository name of the action.
+#                             For example, actions/checkout
+#   github.actor              username of the user that initiated the workflow run
+#   github.api_url            URL of the GitHub REST API.
+#   github.event_name         the name of the event that triggered the workflow run.
+#   github.path               the path on the runner to the file to set system $PATH variables: echo /bin >>$GITHUB_PATH
+#   github.ref_name           branch or tag name that triggered the workflow run
+#   github.ref_type           branch or tag
+#   github.repository         owner/name
+#   github.repository_owner   owner
+#   github.repositoryUrl      git://github.com/owner/name.git
+#   github.server_url         https://github.com
+#   github.workflow           name of the workflow or full path of the workflow file in the repository.
+#   github.workspace          default working directory on the runner for steps, and the default location of repository
+#                             when using the checkout action $GITHUB_WORKSPACE (git top)
+#######################################
+repo() {
+  $ACTION || cd "$(git rev-parse --show-toplevel)"
+}
+
+#######################################
+# main function for GitHub Action tap
+# Globals:
+#   TOKEN
+# Arguments:
+#  None
+#######################################
+main() {
+  local token
+
+  ACTION=true
+  [ "${GITHUB_RUN_ID-}" ] || ACTION=false
+
+  while (( $# )); do
+    case "$1" in
+      --action_path=*) ACTION_PATH="${1#--action_path=}" ;;
+      --commit_email=*) COMMIT_EMAIL="${1#--commit_email=}" ;;
+      --commit_owner=*) COMMIT_OWNER="${1#--commit_owner=}" ;;
+      --debug=*) DEBUG="${1#--debug=}" ;;
+      --depends_on=*) DEPENDS_ON="${1#--depends_on=}" ;;
+      --formula_folder=*) FORMULA_FOLDER="${1#--formula_folder=}" ;;
+      --github_token=*) token="${1#--token=}"; GITHUB_TOKEN="${1:-${token}}" ;;
+      --homebrew_owner=*) HOMEBREW_OWNER="${1#--homebrew_owner=}" ;;
+      --homebrew_tap=*) HOMEBREW_TAP="${1#--homebrew_owner=}" ;;
+      --install=*) INSTALL="${1#--install=}" ;;
+      --skip_commit=*) SKIP_COMMIT="${1#--skip_commit=}" ;;
+      --test=*) TEST="${1#--test=}" ;;
+      --update_readme_table=*) UPDATE_README_TABLE="${1#--update_readme_table=}" ;;
+    esac
+    shift
+  done
+
+  [ "${GITHUB_TOKEN-}" ] || { >&2 echo GITHUB_ACTION: Empty; exit 1; }
+
+  : "${COMMIT_EMAIL=root@example.com}"
+
+  if $ACTION; then
+    : "${COMMIT_OWNER=j5pu}"  # ${{ github.actor }}
+  else
+    : "${COMMIT_OWNER="${USER}"}"
+  fi
+
+  : "${DEBUG=false}"
+  : "${DEPENDS_ON=false}"
+  : "${FORMULA_FOLDER=Formula}"
+  : "${HOMEBREW_OWNER=${COMMIT_OWNER}}"
+  : "${HOMEBREW_TAP=dev}"
+  : "${INSTALL=bin.install name.to_s}"
+  : "${SKIP_COMMIT=false}"
+  : "${TEST="system \"command\", \"-v\", name.to_s"}"
+  : "${UPDATE_README_TABLE=true}"
+
+  envfile COMMIT_EMAIL GITHUB_TOKEN
+
+  for i in COMMIT_EMAIL COMMIT_OWNER DEBUG DEPENDS_ON FORMULA_FOLDER HOMEBREW_OWNER HOMEBREW_TAP INSTALL \
+    SKIP_COMMIT TEST UPDATE_README_TABLE; do
+    echo "${i}: ${!i}"
+  done
+}
+
+main "$@"
+```
