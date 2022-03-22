@@ -230,7 +230,7 @@ runs:
         cd start
         
         if [ ! -f README.md ]; then
-          url=${{ inputs.homebrew_owner }}/homebrew-${{ inputs.homebrew_tap }}/actions/workflows/main.yaml/badge.svg
+          url="${{ inputs.homebrew_owner }}/homebrew-${{ inputs.homebrew_tap }}/actions/workflows/main.yaml/badge.svg"
           {
             echo '# homebrew-${{ inputs.homebrew_tap }}'
             echo
@@ -278,14 +278,14 @@ runs:
       run: |
         cd start
         
-        file=${{ inputs.formula_folder }}/${{ github.event.repository.name }}.rb
+        file="${{ inputs.formula_folder }}/${{ github.event.repository.name }}.rb"
         
-        if [ ! -f ${file} ]; then
+        if [ ! -f "${file}" ]; then
           echo "CHANGED=true" >> $GITHUB_ENV
-          mkdir -p ${{ inputs.formula_folder }}
-          touch ${file}
-          git add ${file}
-          git commit -a -m ${file}
+          mkdir -p ${"{ inputs.formula_folder }}"
+          touch "${file}"
+          git add "${file}"
+          git commit -a -m "${file}"
           git push 
         fi
         
@@ -413,9 +413,9 @@ runs:
 
         EOF
  
-        if ! cmp --quiet /tmp/file ${file}; then
+        if ! cmp --quiet /tmp/file "${file}"; then
           echo "CHANGED=true" >> $GITHUB_ENV
-          mv /tmp/file ${file}
+          mv /tmp/file "${file}"
         fi
         
         cd -
@@ -457,9 +457,9 @@ runs:
         
         EOF
  
-        if ! cmp --quiet /tmp/file ${file}; then
+        if ! cmp --quiet /tmp/file "${file}"; then
           echo "CHANGED=true" >> $GITHUB_ENV
-          mv /tmp/file ${file}
+          mv /tmp/file "${file}"
         fi
         
         cd -
@@ -470,7 +470,7 @@ runs:
         cd tap
         mkdir -p .github/workflows
         
-        file=.github/workflows/${{ github.event.repository.name }}.yaml
+        file=".github/workflows/${{ github.event.repository.name }}.yaml"
         
         cat > /tmp/file <<EOF
         name: ${{ github.event.repository.name }}
@@ -512,11 +512,11 @@ runs:
         EOF
         
         msg=fix
-        [ -f ${file} ] || echo "MSG=feat: ${{ inputs.version }}  ${{ github.event.repository.name }}" >> $GITHUB_ENV
+        [ -f "${file}" ] || echo "MSG=feat: ${{ inputs.version }}  ${{ github.event.repository.name }}" >> $GITHUB_ENV
         
-        if ! cmp --quiet /tmp/file ${file}; then
+        if ! cmp --quiet /tmp/file "${file}"; then
           echo "CHANGED=true" >> $GITHUB_ENV
-          mv /tmp/file ${file}
+          mv /tmp/file "${file}"
         fi
         
         cd -
@@ -551,7 +551,7 @@ runs:
         cd dev
 
         if "${{ github.action_path }}/${{ inputs.homebrew_tap }}" /tmp/${{ inputs.homebrew_tap }} "${PWD}" \
-            ${{ inputs.homebrew_owner }}  | grep -q "^Changed:"; then
+            "${{ inputs.homebrew_owner }}"  | grep -q "^Changed:"; then
           echo "CHANGED=true" >> $GITHUB_ENV
           git add .
           git commit --quiet -a -m "${MSG}"

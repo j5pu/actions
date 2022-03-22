@@ -73,10 +73,10 @@ runs:
       run: |
         CHANGED=false
         PREFIX='v'
-        [ ${{ inputs.strip }} != 'true' ] || { flag='--strip-prefix'; PREFIX=''; }
+        [ "${{ inputs.strip }}" != 'true' ] || { flag='--strip-prefix'; PREFIX=''; }
         CURRENT=$(svu ${flag} current)
         NEXT=$(svu ${flag} next)
-        [ ${CURRENT} = ${NEXT} ] || CHANGED=true
+        [ "${CURRENT}" = "${NEXT}" ] || CHANGED=true
         echo '::echo::on'
         echo "::set-output name=CHANGED::${CHANGED}"
         echo "::set-output name=CURRENT::${CURRENT}"
