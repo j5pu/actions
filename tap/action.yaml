@@ -327,6 +327,8 @@ runs:
     - name: "SHA"
       id: SHA
       run: |
+        cd end
+        
         CHANGED=false
         PREFIX='v'
         NEXT_SHA="$(git rev-parse --verify HEAD)" 
