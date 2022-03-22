@@ -105,9 +105,9 @@ runs:
     - name: "Commit: email"
       run: |
         if [ "${{ inputs.commit_email }}" = "" ]; then 
-          email=${{ steps.ID.outputs.ID }}+${{ github.workflow }}@users.noreply.github.com
+          email="${{ steps.ID.outputs.ID }}+${{ github.workflow }}@users.noreply.github.com"
         else 
-          email=${{ inputs.commit_email }}
+          email="${{ inputs.commit_email }}"
         fi
         echo "EMAIL=${email}" >> $GITHUB_ENV
 
@@ -282,7 +282,7 @@ runs:
         
         if [ ! -f "${file}" ]; then
           echo "CHANGED=true" >> $GITHUB_ENV
-          mkdir -p ${"{ inputs.formula_folder }}"
+          mkdir -p "${{ inputs.formula_folder }}"
           touch "${file}"
           git add "${file}"
           git commit -a -m "${file}"
