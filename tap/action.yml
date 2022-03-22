@@ -550,8 +550,8 @@ runs:
       run: |
         cd dev
 
-        if "${{ github.action_path }}/${{ inputs.homebrew_tap }}" /tmp/${{ inputs.homebrew_tap }} "${PWD}" \
-            "${{ inputs.homebrew_owner }}"  | grep -q "^Changed:"; then
+        if "${{ github.action_path }}/${{ inputs.homebrew_tap }}" "${{ inputs.homebrew_owner }}" \
+          | grep -q "^Changed:"; then
           echo "CHANGED=true" >> $GITHUB_ENV
           git add .
           git commit --quiet -a -m "${MSG}"
