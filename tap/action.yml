@@ -111,6 +111,9 @@ runs:
         fi
         echo "EMAIL=${email}" >> $GITHUB_ENV
 
+        # Issue with here doc and ${{
+        echo 'ESCAPED_TOKEN={{ secrets.token }}' >> $GITHUB_ENV
+        echo 'ESCAPED_TAG_NEXT={{ steps.TAG.outputs.NEXT }}' >> $GITHUB_ENV
         echo 'MATRIX_LANGUAGE={{ matrix.language }}' >> $GITHUB_ENV
         echo 'MATRIX_OS={{ matrix.os }}' >> $GITHUB_ENV
       shell: bash
@@ -575,7 +578,7 @@ runs:
           workflow_dispatch:
 
         env:
-          GITHUB_TOKEN: ${token}
+          GITHUB_TOKEN: \$${ESCAPED_TOKEN}
         
         jobs:
           publish:
@@ -585,7 +588,7 @@ runs:
               uses: j5pu/actions/tag@main
             - uses: j5pu/actions/tap@main
               with:
-                github_token: ${token}}
+                github_token: \$${ESCAPED_TOKEN}
                 depends_on: |
                 $(for i in $(cat /tmp/dev_depends); do echo "  ${i}"; done)
                 install: |
@@ -593,7 +596,7 @@ runs:
                 test: |
                   system "#{HOMEBREW_PREFIX}/bin/homebrew-dev"
                 with:
-                  version: \${{ steps.TAG.outputs.NEXT }}
+                  version: \$${ESCAPED_TAG_NEXT}
         EOF
         
         file=".github/workflows/main.yaml"
