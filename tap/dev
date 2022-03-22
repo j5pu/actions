@@ -12,7 +12,8 @@ shopt -s inherit_errexit
 #  None
 #######################################
 workflow() {
-  local depends formula="${0##*/}" repo="homebrew-${formula}" tmp
+  local depends formula="${0##*/}" repo tmp
+  repo="homebrew-${formula}"
   cd "$1"
   git -C /tmp clone --quiet "https://github.com/${repo}"
 

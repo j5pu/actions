@@ -67,15 +67,15 @@ inputs:
     default: ""
 
 outputs:
-  CHANGED:
+  SHA_CHANGED:
     description: "Formula SHA: changed"
     value: ${{ steps.SHA.outputs.CHANGED }}
 
-  CURRENT:
+  SHA_CURRENT:
     description: "Formula SHA-1: current"
     value: ${{ steps.SHA.outputs.CURRENT }}
 
-  NEXT:
+  SHA_NEXT:
     description: "Formula SHA-1: next"
     value: ${{ steps.SHA.outputs.NEXT }}
 
@@ -295,7 +295,8 @@ runs:
     - run: rm -rf $GITHUB_WORKSPACE/*
       shell: bash
 
-    - run: echo "CURRENT_SHA=$(git rev-parse --verify HEAD)" >> $GITHUB_ENV
+    - run: |
+        echo "SHA_CURRENT=$(git rev-parse --verify HEAD)" >> $GITHUB_ENV
       shell: bash
 
     - name: "Formula: release"
@@ -329,15 +330,18 @@ runs:
       run: |
         cd tap
         
-        CHANGED=false
+        SHA_CHANGED=false
         PREFIX='v'
-        NEXT_SHA="$(git rev-parse --verify HEAD)" 
-        echo "NEXT_SHA=${NEXT_SHA}" >> $GITHUB_ENV
-        [ ${CURRENT_SHA} = ${NEXT_SHA} ] || { CHANGED=true; echo "CHANGED=true" >> $GITHUB_ENV; } 
+        SHA_NEXT="$(git rev-parse --verify HEAD)" 
+        echo "SHA_NEXT=${SHA_NEXT}" >> $GITHUB_ENV
+        if [ ${SHA_CURRENT} != ${SHA_NEXT} ]; then
+          SHA_CHANGED=true
+          echo "CHANGED=true" >> $GITHUB_ENV
+        fi
         echo '::echo::on'
-        echo "::set-output name=CHANGED::${CHANGED}"
-        echo "::set-output name=CURRENT::${CURRENT}"
-        echo "::set-output name=NEXT::${NEXT}"
+        echo "::set-output name=SHA_CHANGED::${SHA_CHANGED}"
+        echo "::set-output name=SHA_CURRENT::${SHA_CURRENT}"
+        echo "::set-output name=SHA_NEXT::${SHA_NEXT}"
       shell: bash
 
     - name: "Formula: Brewfile"
