@@ -67,6 +67,10 @@ inputs:
     default: ""
 
 outputs:
+  DEV_DEPENDS:
+    description: "All depends on for 'dev' Tap"
+    value: ${{ steps.SHA.outputs.DEV_DEPENDS }}
+
   SHA_CHANGED:
     description: "Formula SHA: changed"
     value: ${{ steps.SHA.outputs.CHANGED }}
@@ -336,10 +340,17 @@ runs:
           SHA_CHANGED=true
           echo "CHANGED=true" >> $GITHUB_ENV
         fi
+        
+        DEV_DEPENDS="$(find "${{ inputs.formula_folder }}" -type f -name "*.rb" -not -name "dev.rb"\
+          -exec basename "{}" .rb \; | sed "s|^|\"${{ inputs.homebrew_owner }}/${{ inputs.homebrew_tap }}/|g;s|$|\"|g")"
+        echo "DEV_DEPENDS=${DEV_DEPENDS}" >> $GITHUB_ENV
+        
         echo '::echo::on'
+        echo "::set-output name=DEV_DEPENDS::${DEV_DEPENDS}"
         echo "::set-output name=SHA_CHANGED::${SHA_CHANGED}"
         echo "::set-output name=SHA_CURRENT::${SHA_CURRENT}"
         echo "::set-output name=SHA_NEXT::${SHA_NEXT}"
+
       shell: bash
 
     - name: "Formula: Brewfile"
@@ -538,9 +549,17 @@ runs:
     - run: rm -rf $GITHUB_WORKSPACE/*
       shell: bash
 
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         path: dev
+        repository: ${{ inputs.homebrew_owner }}/${{ inputs.homebrew_tap }}
+        fetch-depth: 0
+        token: ${{ env.GITHUB_TOKEN }}
+      if: env.CHANGED == 'true' && github.event.repository.name != 'dev' && inputs.homebrew_tap == 'dev'
+
+    - uses: actions/checkout@v3
+      with:
+        path: tap
         repository: ${{ inputs.homebrew_owner }}/homebrew-${{ inputs.homebrew_tap }}
         fetch-depth: 0
         token: ${{ env.GITHUB_TOKEN }}
