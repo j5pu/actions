@@ -501,36 +501,36 @@ runs:
             mkdir -p .github.workflows
         
             cat > .github.workflows/main.yaml <<EOF
-              name: main
-              
-              on:
-                push:
-                  branches:
-                    - '**'
-                workflow_dispatch:
-              
-              env:
-                GITHUB_TOKEN: ${{ secrets.TOKEN }}
-              
-              jobs:
-                publish:
-                  needs: test
-                  runs-on: ubuntu-latest
-                  steps:
-                    - id: TAG
-                      uses: j5pu/actions/tag@main
-                    - uses: j5pu/actions/tap@main
-                      with:
-                        github_token: ${{ secrets.TOKEN }}
-                        depends_on: |
-                          ${depends}
-                        install: |
-                          bin.install homebrew-${{ inputs.homebrew_tap }}
-                        test: |
-                          system "#{HOMEBREW_PREFIX}/bin/homebrew-${{ inputs.homebrew_tap }}"
-                      if: steps.TAG.outputs.CHANGED == 'true'
-                      
-            EOF
+        name: main
+        
+        on:
+          push:
+            branches:
+              - '**'
+          workflow_dispatch:
+        
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}
+        
+        jobs:
+          publish:
+            needs: test
+            runs-on: ubuntu-latest
+            steps:
+              - id: TAG
+                uses: j5pu/actions/tag@main
+              - uses: j5pu/actions/tap@main
+                with:
+                  github_token: ${{ secrets.TOKEN }}
+                  depends_on: |
+                    ${depends}
+                  install: |
+                    bin.install homebrew-${{ inputs.homebrew_tap }}
+                  test: |
+                    system "#{HOMEBREW_PREFIX}/bin/homebrew-${{ inputs.homebrew_tap }}"
+                if: steps.TAG.outputs.CHANGED == 'true'
+    
+        EOF
             git add .github.workflows/main.yaml
             git commit -a -m "${MSG:-fix}: ${{ github.event.repository.name }}" .github.workflows/main.yaml
             git push
