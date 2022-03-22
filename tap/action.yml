@@ -542,7 +542,7 @@ runs:
         repository: ${{ inputs.homebrew_owner }}/homebrew-${{ inputs.homebrew_tap }}
         fetch-depth: 0
         token: ${{ env.GITHUB_TOKEN }}
-      if: env.CHANGED == 'true' && github.event.repository.name != "dev" && inputs.homebrew_tap == "dev"
+      if: env.CHANGED == 'true' && github.event.repository.name != 'dev' && inputs.homebrew_tap == 'dev'
 
     - name: "Updates Formula/dev.rb"
       run: |
@@ -556,7 +556,7 @@ runs:
           git push --quiet
         fi
       shell: bash
-      if: env.CHANGED == 'true' && github.event.repository.name != "dev" && inputs.homebrew_tap == "dev"
+      if: env.CHANGED == 'true' && github.event.repository.name != 'dev' && inputs.homebrew_tap == 'dev'
 
     - name: "Formula: tag"
       uses: j5pu/actions/tag@main
