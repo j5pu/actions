@@ -11,7 +11,7 @@ shopt -s inherit_errexit
 workflow() {
   local depends formula="${0##*/}" repo tmp
   repo="homebrew-${formula}"
-  git -C /tmp clone --quiet "https://github.com/${repo}"
+  git -C /tmp clone --quiet "https://github.com/${repo}/${formula}.git"
 
   depends="$(find "/tmp/${repo}/Formula" -type f -name "*.rb" -not -name "${formula}.rb"\
     -exec basename "{}" .rb \; | sed "s|^|\"${1}/${formula}/|g;s|$|\"|g")"
