@@ -341,7 +341,7 @@ runs:
         fi
         
         find "${{ inputs.formula_folder }}" -type f -name "*.rb" -not -name "dev.rb" -exec basename "{}" .rb \; \
-          | sed "s|^|\"${{ inputs.homebrew_owner }}/${{ inputs.homebrew_tap }}/|g;s|$|\"|g")" >/tmp/dev_depends
+          | sed "s|^|\"${{ inputs.homebrew_owner }}/${{ inputs.homebrew_tap }}/|g;s|$|\"|g" >/tmp/dev_depends
         
         cat /tmp/dev_depends
 
