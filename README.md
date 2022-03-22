@@ -474,7 +474,7 @@ pathfile() {
 #   github.action             name of the action currently running, or the id of a step
 #   github.action_path        path where an action is located. This property is only supported in composite actions.
 #                             You can use this path to access files located in the same repository as the action:
-#                             i.e: tag/action.yml
+#                             i.e: action.yml
 #   github.action_repository  for a step executing an action, this is the owner and repository name of the action.
 #                             For example, actions/checkout
 #   github.actor              username of the user that initiated the workflow run
