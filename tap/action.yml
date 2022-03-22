@@ -79,6 +79,7 @@ outputs:
     description: "Formula SHA-1: next"
     value: ${{ steps.DEPENDS.outputs.SHA_NEXT }}
 
+
 runs:
   using: "composite"
   steps:
