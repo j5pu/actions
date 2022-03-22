@@ -289,14 +289,12 @@ runs:
           git push 
         fi
         
+        echo "SHA_CURRENT=$(git rev-parse --verify HEAD)" >> $GITHUB_ENV
+ 
         cd -
       shell: bash
 
     - run: rm -rf $GITHUB_WORKSPACE/*
-      shell: bash
-
-    - run: |
-        echo "SHA_CURRENT=$(git rev-parse --verify HEAD)" >> $GITHUB_ENV
       shell: bash
 
     - name: "Formula: release"
@@ -334,7 +332,7 @@ runs:
         PREFIX='v'
         SHA_NEXT="$(git rev-parse --verify HEAD)" 
         echo "SHA_NEXT=${SHA_NEXT}" >> $GITHUB_ENV
-        if [ ${SHA_CURRENT} != ${SHA_NEXT} ]; then
+        if [ "${SHA_CURRENT}" != "${SHA_NEXT}" ]; then
           SHA_CHANGED=true
           echo "CHANGED=true" >> $GITHUB_ENV
         fi
