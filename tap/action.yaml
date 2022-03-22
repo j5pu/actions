@@ -314,6 +314,16 @@ runs:
         update_readme_table: ${{ inputs.update_readme_table }}
         debug: ${{ inputs.debug }}
 
+    - run: sudo rm -rf $GITHUB_WORKSPACE/*
+      shell: bash
+
+    - uses: actions/checkout@v2
+      with:
+        path: end
+        repository: ${{ inputs.homebrew_owner }}/homebrew-${{ inputs.homebrew_tap }}
+        fetch-depth: 0
+        token: ${{ env.GITHUB_TOKEN }}
+
     - name: "SHA"
       id: SHA
       run: |
@@ -327,16 +337,6 @@ runs:
         echo "::set-output name=CURRENT::${CURRENT}"
         echo "::set-output name=NEXT::${NEXT}"
       shell: bash
-
-    - run: sudo rm -rf $GITHUB_WORKSPACE/*
-      shell: bash
-
-    - uses: actions/checkout@v2
-      with:
-        path: end
-        repository: ${{ inputs.homebrew_owner }}/homebrew-${{ inputs.homebrew_tap }}
-        fetch-depth: 0
-        token: ${{ env.GITHUB_TOKEN }}
 
     - name: "Formula: Brewfile"
       run: |
