@@ -491,17 +491,12 @@ runs:
           if [ ${{ github.event.repository.name }} != "dev" ] && [ ${{ inputs.homebrew_tap }} = "dev" ]; then
             git -C /tmp clone https://github.com/${{ inputs.homebrew_owner }}/${{ inputs.homebrew_tap }}
             export GITHUB_RUN_ID
-            "${ACTION_PATH%/*}/${{ inputs.homebrew_tap }}" "${PWD}" ${{ inputs.homebrew_owner }}
-        
-            git -C /tmp/dev config --global user.email "${{ env.EMAIL }}"
-            git -C /tmp/dev config --global user.name "${{ inputs.commit_owner }}"
-            git -C /tmp/dev add .
-            git -C /tmp/dev commit -a -m "${msg}"
-            git -C /tmp/devpush            
+            "${ACTION_PATH%/*}/${{ inputs.homebrew_tap }}" "${PWD}" ${{ inputs.homebrew_owner }} "${{ env.EMAIL }}" \
+              "${{ inputs.commit_owner }}"  
           fi
           git add .
-          git commit -a -m "${msg}"
-          git push
+          git commit --quiet -a -m "${msg}"
+          git push --quiet
         fi
       shell: bash
       

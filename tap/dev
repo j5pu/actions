@@ -12,15 +12,16 @@ shopt -s inherit_errexit
 #  None
 #######################################
 workflow() {
-  local depends formula
+  local depends formula tmp
   formula="${0##*/}"
   depends="$(find "${1}/Formula" -type f -name "*.rb" -not -name "${formula}.rb"\
     -exec basename "{}" .rb \; | sed "s|^|\"${2}/${formula}/|g;s|$|\"|g")"
     
   cd "$(git rev-parse --show-toplevel)"
-  mkdir -p .github/workflows
+  test -d .github/workflows || mkdir -p .github/workflows
 
-  cat > .github/workflows/main.yaml <<EOF
+  tmp="$(mktemp)"
+  cat > "${tmp}" <<EOF
 name: main
 
 on:
@@ -51,6 +52,15 @@ $(for i in ${depends}; do echo "            ${i}"; done)
         if: steps.TAG.outputs.CHANGED == 'true'
 
 EOF
+  if ! cmp --quiet "${tmp}" .github/workflows/main.yaml 2>/dev/null; then
+    >&2 echo Changed: "${PWD}/.github/workflows/main.yaml"
+    mv "${tmp}" .github/workflows/main.yaml
+    git config --global user.email "$4"
+    git config --global user.name "$5"
+    git add .github/workflows/main.yaml
+    git commit --quiet -a -m "$3"
+    git push --quiet
+  fi
 }
 
 #######################################
@@ -58,9 +68,13 @@ EOF
 # Arguments:
 #  1    homebrew-dev repository path
 #  2    tap owner
+#  3    message
+#  4    email
+#  5    name
 #######################################
 main() {
-  [ "${GITHUB_RUN_ID-}" ] || exit
+  [ "${GITHUB_RUN_ID-}" ] || exit 0
+  >&2 echo Starting: "$0"
   workflow "$@"
 }
 
