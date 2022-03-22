@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+
+set -eu
+shopt -s inherit_errexit
+
+#######################################
+# update workflow
+# Globals:
+#   depends
+#   {
+# Arguments:
+#  None
+#######################################
+workflow() {
+  local depends formula
+  formula="${0##*/}"
+  depends="$(find "${1}/Formula" -type f -name "*.rb" -not -name "${formula}.rb"\
+    -exec basename "{}" .rb \; | sed "s|^|\"${2}/${formula}/|g;s|$|\"|g")"
+    
+  cd "$(git rev-parse --show-toplevel)"
+  mkdir -p .github/workflows
+
+  cat > .github/workflows/main.yaml <<EOF
+name: main
+
+on:
+  push:
+    branches:
+      - '**'
+  workflow_dispatch:
+
+env:
+  GITHUB_TOKEN: \${{ secrets.TOKEN }}
+
+jobs:
+  publish:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - id: TAG
+        uses: j5pu/actions/tag@main
+      - uses: j5pu/actions/tap@main
+        with:
+          github_token: \${{ secrets.TOKEN }}
+          depends_on: |
+$(for i in ${depends}; do echo "            ${i}"; done)
+          install: |
+            bin.install homebrew-${formula}
+          test: |
+            system "#{HOMEBREW_PREFIX}/bin/homebrew-${formula}"
+        if: steps.TAG.outputs.CHANGED == 'true'
+
+EOF
+}
+
+#######################################
+# updates dev formula in homebrew-dev with all formulas when a formula has changed. It is executed on GitHub.
+# Arguments:
+#  1    homebrew-dev repository path
+#  2    tap owner
+#######################################
+main() {
+  [ "${GITHUB_RUN_ID-}" ] || exit
+  workflow "$@"
+}
+
+main "$@"
