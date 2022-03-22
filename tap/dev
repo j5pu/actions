@@ -12,10 +12,10 @@ shopt -s inherit_errexit
 #  None
 #######################################
 workflow() {
-  local depends formula tmp
-  formula="${0##*/}"
-  depends="$(find "${1}/Formula" -type f -name "*.rb" -not -name "${formula}.rb"\
-    -exec basename "{}" .rb \; | sed "s|^|\"${2}/${formula}/|g;s|$|\"|g")"
+  local depends formula="${0##*/}" tmp
+  cd "$1"
+  depends="$(find "${2}/Formula" -type f -name "*.rb" -not -name "${formula}.rb"\
+    -exec basename "{}" .rb \; | sed "s|^|\"${3}/${formula}/|g;s|$|\"|g")"
     
   cd "$(git rev-parse --show-toplevel)"
   test -d .github/workflows || mkdir -p .github/workflows
@@ -55,10 +55,10 @@ EOF
   if ! cmp --quiet "${tmp}" .github/workflows/main.yaml 2>/dev/null; then
     >&2 echo Changed: "${PWD}/.github/workflows/main.yaml"
     mv "${tmp}" .github/workflows/main.yaml
-    git config --global user.email "$4"
-    git config --global user.name "$5"
+    git config --global user.email "$5"
+    git config --global user.name "$6"
     git add .github/workflows/main.yaml
-    git commit --quiet -a -m "$3"
+    git commit --quiet -a -m "$4"
     git push --quiet
   fi
 }
@@ -66,11 +66,12 @@ EOF
 #######################################
 # updates dev formula in homebrew-dev with all formulas when a formula has changed. It is executed on GitHub.
 # Arguments:
-#  1    homebrew-dev repository path
-#  2    tap owner
-#  3    message
-#  4    email
-#  5    name
+#  1    dev repository path
+#  2    homebrew-dev repository path
+#  3    tap owner
+#  4    message
+#  5    email
+#  6    name
 #######################################
 main() {
   [ "${GITHUB_RUN_ID-}" ] || exit 0
