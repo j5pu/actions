@@ -510,7 +510,7 @@ runs:
           workflow_dispatch:
         
         env:
-          GITHUB_TOKEN: ${{ secrets.TOKEN }}
+          GITHUB_TOKEN: \${{ secrets.TOKEN }}
         
         jobs:
           publish:
@@ -521,7 +521,7 @@ runs:
                 uses: j5pu/actions/tag@main
               - uses: j5pu/actions/tap@main
                 with:
-                  github_token: ${{ secrets.TOKEN }}
+                  github_token: \${{ secrets.TOKEN }}
                   depends_on: |
                     ${depends}
                   install: |
