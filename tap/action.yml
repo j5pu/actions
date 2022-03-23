@@ -590,7 +590,7 @@ runs:
               with:
                 github_token: \$${ESCAPED_TOKEN}
                 depends_on: |
-                $(for i in $(cat /tmp/dev_depends); do echo "  ${i}"; done)
+        $(for i in $(cat /tmp/dev_depends); do echo "          ${i}"; done)
                 install: |
                   bin.install homebrew-dev
                 test: |
