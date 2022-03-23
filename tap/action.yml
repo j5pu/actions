@@ -595,8 +595,7 @@ runs:
                     bin.install homebrew-dev
                   test: |
                     system "#{HOMEBREW_PREFIX}/bin/homebrew-dev"
-                  with:
-                    version: \$${ESCAPED_TAG_NEXT}
+                  version: \$${ESCAPED_TAG_NEXT}
         EOF
         
         file=".github/workflows/main.yaml"
