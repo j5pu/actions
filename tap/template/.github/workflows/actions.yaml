@@ -1,0 +1,36 @@
+name: actions
+
+on: 
+  push:
+    tags:
+      - '**'
+  release:
+    types:
+      - '!**'
+  workflow_dispatch:
+
+jobs:
+  -------:
+    runs-on: ${{ matrix.os }}
+    strategy: 
+      matrix:
+        os: [macos-latest, ubuntu-latest]
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Set up Homebrew
+        uses: Homebrew/actions/setup-homebrew@master
+      - name: "actions: audit"
+        run: sh -c 'brew audit --new --git --formula Formula/actions.rb || true'
+      - name: "actions: tap"
+        run: brew tap j5pu/dev
+      - name: "actions: install"
+        run: |
+          brew install j5pu/dev/actions
+        env:
+          HOMEBREW_NO_ENV_HINTS: 1
+      - name: "actions: test"
+        run: |
+          brew test j5pu/dev/actions
+

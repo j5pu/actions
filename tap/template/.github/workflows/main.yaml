@@ -1,0 +1,48 @@
+name: main
+
+on: 
+  push:
+    tags:
+      - '**'
+  release:
+    types:
+      - '!**'
+  workflow_dispatch:
+
+jobs:
+  tests:
+    runs-on: ${{ matrix.os }}
+    strategy: 
+      matrix:
+        os: [macos-latest, ubuntu-latest]
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Set up Homebrew
+        uses: Homebrew/actions/setup-homebrew@master
+      - name: "Bundle: install"
+        run: brew bundle --quiet --no-lock
+
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-latest, ubuntu-latest]
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Set up Homebrew
+        uses: Homebrew/actions/setup-homebrew@master
+      - name: "bats.bash: audit"
+        run: sh -c 'brew audit --new --git --formula Formula/bats.bash.rb || true'
+      - name: "bats.bash: tap"
+        run: brew tap j5pu/dev
+      - name: "bats.bash: install"
+        run: |
+          brew install j5pu/dev/bats.bash
+        env:
+          HOMEBREW_NO_ENV_HINTS: 1
+      - name: "bats.bash: test"
+        run: |
+          brew test j5pu/dev/bats.bash

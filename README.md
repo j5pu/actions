@@ -153,6 +153,7 @@ on:
 ### Another action to be triggered after tag
 An action in a workflow run 
 [can’t trigger a new workflow](https://github.community/t/github-actions-workflow-not-triggering-with-tag-push/17053/2).
+[new tag does not trigger an event](https://github.community/t/new-tag-does-not-trigger-an-event/121511)
 
 ```bash
 secrets.sh
@@ -479,10 +480,18 @@ pathfile() {
 #                             For example, actions/checkout
 #   github.actor              username of the user that initiated the workflow run
 #   github.api_url            URL of the GitHub REST API.
+#   github.event
+#                             if: github.event.base_ref=='refs/heads/master'
 #   github.event_name         the name of the event that triggered the workflow run.
+#                             if: github.event_name == 'release' && github.event.action == 'created'
+#                             if: github.event_name == 'push' 
 #   github.path               the path on the runner to the file to set system $PATH variables: echo /bin >>$GITHUB_PATH
 #   github.ref_name           branch or tag name that triggered the workflow run
-#   github.ref_type           branch or tag
+#   github.ref_type           branch or tag:
+#                             if: ${{ github.ref_type == 'tag' && github.event.base_ref=='refs/heads/master' }}
+#                             if: startsWith(github.ref, 'refs/tags/v')
+#                             if: github.event_name == 'push' 
+#
 #   github.repository         owner/name
 #   github.repository_owner   owner
 #   github.repositoryUrl      git://github.com/owner/name.git
