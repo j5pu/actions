@@ -5,6 +5,7 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="rc" />
+    <orderEntry type="module" module-name="secrets" />
   </component>
   <component name="PyDocumentationSettings">
     <option name="format" value="GOOGLE" />
