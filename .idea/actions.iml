@@ -6,6 +6,7 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="rc" />
     <orderEntry type="module" module-name="secrets" />
+    <orderEntry type="module" module-name="bats.bash" />
   </component>
   <component name="PyDocumentationSettings">
     <option name="format" value="GOOGLE" />

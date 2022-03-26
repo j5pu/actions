@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/actions.iml" filepath="$PROJECT_DIR$/.idea/actions.iml" />
+      <module fileurl="file://$PROJECT_DIR_BATS_BASH$/.idea/bats.bash.iml" filepath="$PROJECT_DIR_BATS_BASH$/.idea/bats.bash.iml" />
       <module fileurl="file://$ZDOTDIR$/rc.iml" filepath="$ZDOTDIR$/rc.iml" />
       <module fileurl="file://$PROJECT_DIR$/../secrets/.idea/secrets.iml" filepath="$PROJECT_DIR$/../secrets/.idea/secrets.iml" />
     </modules>
