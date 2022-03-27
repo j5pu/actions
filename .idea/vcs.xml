@@ -2,6 +2,7 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../Downloads/imac/Archive/data" vcs="Git" />
     <mapping directory="$PROJECT_DIR_BATS_BASH$" vcs="Git" />
     <mapping directory="$PROJECT_DIR_RC$" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/../secrets" vcs="Git" />
