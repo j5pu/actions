@@ -5,12 +5,26 @@ branding:
   icon: "activity"
   color: "orange"
 
+outputs:
+  bumped:
+    description: "Tag/Version: Bumped (true/false)"
+    value: ${{ steps.tag.outputs.bumped }}
+
+  version:
+    description: "Tag/Version: Current (After bumped if bumped)"
+    value: ${{ steps.tag.outputs.version }}
+
 runs:
   using: "composite"
   steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@main
       with:
         fetch-depth: 0
-        token: ${{ env.GH_TOKEN }}
+        token: ${{ env.GITHUB_TOKEN }}
+
+    - id: tag
+      run: "${{ github.action_path }}/bin/version tag"
+      shell: bash
+      if: github.ref_type == "branch"
 
 

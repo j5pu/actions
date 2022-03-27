@@ -78,6 +78,8 @@ _output() {
   echo '::echo::on'
   echo "::set-output name=bumped::$1"
   echo "::set-output name=version::${NEXT}"
+  echo "BUMPED=$1" >> "${GITHUB_ENV}"
+  echo "VERSION=${NEXT}" >> "${GITHUB_ENV}"
   exit
 }
 
