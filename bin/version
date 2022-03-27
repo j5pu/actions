@@ -1,0 +1,206 @@
+#!/usr/bin/env bash
+
+set -eu
+set -o errtrace
+trap "exit 1" SIGUSR1
+PID=$$
+
+#######################################
+# die with error code
+# Globals:
+#   PWD
+# Arguments:
+#  None
+#######################################
+_die() {
+  if $? -eq 0; then
+    echo "$@"
+    exit
+  else
+    >&2 echo "$(tput bold)$(tput setaf 1)x$(tput sgr0) $0: $PWD: $(tput italic)$*$(tput sgr0)"
+    exit $?
+  fi
+}
+
+#######################################
+# description
+# Globals:
+#   CURRENT
+#   NEXT
+# Arguments:
+#   0
+#######################################
+_globals() {
+  CURRENT="$("$0" current)"
+  NEXT="$("$0" next)"
+}
+
+#######################################
+# install svu
+# Globals:
+#   GITHUB_PATH
+# Arguments:
+#   0
+#######################################
+_install() {
+  local path
+  if _requires svu >/dev/null; then
+    if grep -i debian /etc/os-release; then
+      echo "deb [trusted=yes] https://apt.fury.io/caarlos0/ /" \
+        | sudo tee /etc/apt/sources.list.d/caarlos0.list >/dev/null
+      sudo apt update -qq >/dev/null && sudo apt install -qq svu >/dev/null
+    elif [ "$(uname -s)" = "Darwin" ]; then
+      brew update --quiet >/dev/null && brew install --quiet caarlos0/tap/svu >/dev/null
+    fi
+  fi
+
+  if _requires "${0##*/}" >/dev/null; then
+    path="$(cd "$(dirname "$0")"; pwd -P)"
+    if [ "${GITHUB_PATH-}" ]; then
+      dirname "${path}" >>"${GITHUB_PATH}"
+    elif test -d /etc/paths.d && ! grep -q "${path}" /etc/paths.d/* 2>/dev/null; then
+      dirname "${path}" | sudo tee /etc/paths.d/version >/dev/null
+    fi
+  fi
+}
+
+#######################################
+# sets GitHub Action outputs
+# Globals:
+#   NEXT
+# Arguments:
+#  1  "true" if version has been bumped, "false" otherwise.
+# Outputs:
+#   bumped    "true" if old version and next version were different and has been tagged, "false" otherwise
+#   version   contains the bumped new version or empty
+#######################################
+_output() {
+  echo '::echo::on'
+  echo "::set-output name=bumped::$1"
+  echo "::set-output name=version::${NEXT}"
+  exit
+}
+
+#######################################
+# true if command is not in $PATH
+# Arguments:
+#   1   command
+# Returns:
+#  1 if command in $PATH
+#######################################
+_requires() { ! command -v "$1" >/dev/null; }
+
+#######################################
+# display script' commands
+# Arguments:
+#   0
+#######################################
+commands() { awk -F '(' '/^[a-z].*\(\)/ && ! /^main/ { print $1 }' "$0"; }
+
+#######################################
+# show usage
+# Globals:
+#   USER
+# Arguments:
+#   0
+#######################################
+help() {
+  local rc=$?
+  [ ! "${1-}" ] || { echo "${0##*/}: $1: invalid command"; echo; }
+  >&2 cat <<EOF
+usage: ${0##*/} [<command>]
+   or: ${0##*/} -h|--help
+   or: . ${0##*/}
+
+svu wrapper and version management (local and GitHub Actions)
+
+Commands:
+   commands     display ${0##*/}' commands
+   help         show help and exit
+   needs        display next version and returns 0 if current and next versions are different
+   tag          git tag if current and next versions are different, returns 1 if dirty or versions are the same
+
+$(svu help)
+EOF
+  exit $rc
+}
+
+#######################################
+# current and next versions are different
+# Globals:
+#   CURRENT
+#   NEXT
+# Arguments:
+#   None
+# Returns:
+#   1 if current and previous version are the same (0 for GitHub, using bumped step outputs as "return")
+#   0 if current and next versions are different
+# Outputs:
+#   stdout    next version when returns 0
+#   stderr    composed message with current version or dirty repository when returns 1
+#######################################
+needs() {
+  if [ "${CURRENT}" != "${NEXT}" ]; then
+    _die "${NEXT}"
+  else
+    _die "${CURRENT} == ${NEXT}"
+  fi
+}
+
+#######################################
+# git tag and push tag when current and next versions are different and repository is clean
+# Globals:
+#   CURRENT
+#   GITHUB_PATH
+#   NEXT
+# Arguments:
+#   0
+# Returns:
+#   1 if current and previous version are the same or dirty repository (0 for GitHub, bumped step outputs as "return")
+#   0 if current and next versions are different
+# Outputs:
+#   stdout    next version when returns 0
+#   stderr    composed message with current version or dirty repository when returns 1
+#######################################
+tag() {
+  if [ -z "$(git status -s)" ]; then
+    if [ "${CURRENT}" != "${NEXT}" ]; then
+      git tag "${NEXT}" && git push --quiet origin "${NEXT}"
+      if [ ! "${GITHUB_PATH-}" ]; then
+        _die "${NEXT}"
+      else
+        _output "true"
+      fi
+    else
+      if [ "${GITHUB_PATH-}" ]; then
+        _output "false"
+      else
+        _die "${CURRENT} == ${NEXT}"
+      fi
+    fi
+  else
+    _die Dirty Repository
+  fi
+}
+
+#######################################
+# svu wrapper and version management (local and GitHub Actions)
+# Arguments:
+#  None
+#######################################
+main() {
+  cd "$(git rev-parse --show-toplevel || kill -SIGUSR1 $PID)" || _die "No Git Repository"
+
+  if [ "${1-}" ]; then
+    case "${1-}" in
+      --help|-h|help) help ;;
+      needs|tag) _globals; "$1" ;;
+      next*|major|minor|patch|current) : ;;
+      *) false || help "$1" ;;
+    esac
+  fi
+  _install
+  svu "$@" --strip-prefix
+}
+
+main "$@"

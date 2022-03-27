@@ -1,0 +1,16 @@
+name: tap
+
+on:
+  push:
+    tags:
+      - '**'
+
+jobs:
+  tap:
+    runs-on: ubuntu-latest
+    name: tap
+    steps:
+      - name: "Tap"
+        uses: j5pu/actions/tap@main
+        with:
+          github_token: ${{ secrets.TOKEN }}

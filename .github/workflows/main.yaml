@@ -1,0 +1,17 @@
+name: main
+
+on:
+  push:
+  release:
+  workflow_dispatch:
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+
+jobs:
+
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - id: release
+        uses: j5pu/actions/release@main

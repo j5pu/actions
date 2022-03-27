@@ -1,0 +1,129 @@
+#!/usr/bin/env bash
+
+set -eu
+set -o pipefail
+set -o errtrace
+XTRACE="$(mktemp)"
+exec 19>"${XTRACE}"
+export BASH_XTRACEFD=19
+trap "set +x; >&2 echo -n \$BASH_COMMAND:; >&2 caller 0; >&2 cat \${XTRACE}" ERR
+trap "_clean" EXIT
+
+#######################################
+# clean helper
+# Arguments:
+#  None
+#######################################
+_clean() {
+  local i
+  for i in "${REMOTE-}" "${REPO-}" "${TMP-}" "${TMPD-}"; do
+    [ ! -e "${i}" ] || rm -rf "${i}"
+  done
+}
+
+#######################################
+# create a local test repository and a local remote
+# Globals:
+#   REMOTE
+# Arguments:
+#  None
+#######################################
+_repo() {
+  ! test -d "${REMOTE-}" || rm -rf "${REMOTE}"
+  ! test -d "${REPO-}" || rm -rf "${REPO}"
+  REMOTE="$(mktemp -d)/remote.git"
+  REPO="$(mktemp -d)/repo"
+
+  git init --bare --quiet "${REMOTE}"
+  git init --quiet "${REPO}"
+  cd "${REPO}"
+  touch README.md
+  git add README.md
+  git commit --quiet -m "first commit"
+  git branch -M main
+  git remote add origin "${REMOTE}"
+  git push --quiet -u origin main
+  [ ! "${GITHUB_ACTION-}" ] || return 0
+  git config --global user.name root
+  git config --global user.email root@example.com
+}
+
+#######################################
+# reset $_TMP file
+# Globals:
+#   TMP
+# Arguments:
+#  None
+#######################################
+_tmp() { TMP="$(mktemp)"; }
+
+#######################################
+# reset $_TMPD directory
+# Globals:
+#   TMPD
+# Arguments:
+#  None
+#######################################
+_tmpd() { TMPD="$(mktemp -d)"; }
+
+#######################################
+# tests version
+# Globals:
+#   current
+#   svu
+# Arguments:
+#  None
+#######################################
+version() {
+  local current svu
+
+  #######################################
+  #
+  command -v svu >/dev/null 2>&19
+
+  #######################################
+  #
+  cd "${TOP}"
+  svu="$(svu)"
+  current="${svu#v}"
+  test "${current}" = "$(command "${FUNCNAME[0]}")"
+
+  #######################################
+  #
+  cd /tmp
+  command version needs 2>&1 | grep -q "fatal: not a git repository"
+
+  #######################################
+  #
+  _repo
+  command version needs 2>&1 | grep -q "0.0.0 == 0.0.0"
+
+  #######################################
+#
+  touch file
+  command version tag 2>&1 | grep -q "Dirty Repository"
+
+  #######################################
+#
+  touch file
+  command version tag 2>&1 | grep -q "Dirty Repository"
+
+}
+
+#######################################
+# main for actions repository testing
+# Arguments:
+#  None
+#######################################
+main() {
+  cd "$(git rev-parse --show-toplevel)"
+  unset TOP
+  TOP="${PWD}"
+  PATH="${PWD}/bin:${PATH}"
+  export PATH
+  _tmp
+  _tmpd
+  version
+}
+
+main "$@"

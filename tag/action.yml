@@ -5,43 +5,14 @@ branding:
   icon: "tag"
   color: "green"
 
-inputs:
-  keep:
-    description: 'Release: keep'
-    required: false
-    default: '3'
-
-  release:
-    description: 'Release: create'
-    required: false
-    default: 'true'
-
-  repository:
-    description: 'Repository: user/name'
-    required: false
-    default: ${{ github.repository }}
-
-  strip:
-    description: 'Version: strip prefix'
-    required: false
-    default: 'true'
-
 outputs:
-  CHANGED:
-    description: "Version: changed"
-    value: ${{ steps.VERSION.outputs.CHANGED }}
-
-  CURRENT:
-    description: "Version: current"
+  updated:
+    description: "Version: Updated"
     value: ${{ steps.VERSION.outputs.CURRENT }}
 
-  NEXT:
-    description: "Version: next"
-    value: ${{ steps.VERSION.outputs.NEXT }}
-
-  PREFIX:
-    description: "Version: prefix"
-    value: ${{ steps.VERSION.outputs.PREFIX }}
+  version:
+    description: "Version"
+    value: ${{ steps.svu.outputs.version }}
 
 runs:
   using: "composite"
@@ -58,15 +29,15 @@ runs:
           sudo tee /etc/apt/sources.list.d/caarlos0.list >/dev/null
         sudo apt update -qq &>/dev/null
         sudo apt install -qq svu &>/dev/null
-      if: runner.os == 'Linux'
       shell: bash
+      if: github.ref_type == 'branch' && runner.os == 'Linux'
 
     - name: "svu: macOS"
       run: |
         brew update --quiet >/dev/null
         brew install --quiet caarlos0/tap/svu >/dev/null
-      if: runner.os == 'macOS'
       shell: bash
+      if: github.ref_type == 'branch' && runner.os == 'macOS'
 
     - name: "Version"
       id: VERSION
@@ -83,13 +54,14 @@ runs:
         echo "::set-output name=NEXT::${NEXT}"
         echo "::set-output name=PREFIX::${PREFIX}"
       shell: bash
+      if: github.ref_type == "branch"
 
     - name: "Tag & push"
       run: |
         git tag ${{ steps.VERSION.outputs.NEXT }}
         git push origin ${{ steps.VERSION.outputs.NEXT }}
-      if: steps.VERSION.outputs.CHANGED == 'true'
       shell: bash
+      if: github.ref_type == 'branch' && steps.VERSION.outputs.CHANGED == 'true'
 
     - name: "Release: create"
       id: create
@@ -97,7 +69,7 @@ runs:
       with:
         repository: ${{ inputs.repository }}
         tag_name: ${{ steps.VERSION.outputs.NEXT }}
-      if: inputs.release == 'true' && steps.VERSION.outputs.CHANGED == 'true'
+      if: github.ref_type == 'branch' && steps.VERSION.outputs.CHANGED == 'true'
 
     - name: "Release: delete"
       uses: dev-drprasad/delete-older-releases@v0.2.0

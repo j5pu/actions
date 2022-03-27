@@ -1,0 +1,12 @@
+name: id
+
+on:
+  workflow_dispatch:
+
+jobs:
+  id:
+    runs-on: ubuntu-latest
+    steps:
+      - id: ID
+        uses: j5pu/actions/id@main
+      - run: echo ${{ steps.ID.outputs.ID }}
