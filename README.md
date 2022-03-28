@@ -499,6 +499,16 @@ pathfile() {
 #   github.workflow           name of the workflow or full path of the workflow file in the repository.
 #   github.workspace          default working directory on the runner for steps, and the default location of repository
 #                             when using the checkout action $GITHUB_WORKSPACE (git top)
+#
+# - run: ls -la "${GITHUB_WORKSPACE}" && echo && pwd && echo "${HOME}" && command -v version
+# .
+# ..
+# .git
+#
+# /home/runner/work/mReleaser/mReleaser
+# /home/runner
+# /home/runner/work/_actions/j5pu/mReleaser/main/bin/version
+
 #######################################
 repo() {
   $ACTION || cd "$(git rev-parse --show-toplevel)"
