@@ -54,7 +54,7 @@ runs:
         echo "::set-output name=NEXT::${NEXT}"
         echo "::set-output name=PREFIX::${PREFIX}"
       shell: bash
-      if: github.ref_type == "branch"
+      if: github.ref_type == 'branch'
 
     - name: "Tag & push"
       run: |
