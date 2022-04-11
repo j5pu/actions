@@ -79,5 +79,4 @@ runs:
         repo: ${{ inputs.repository }}
       env:
         GITHUB_TOKEN: ${{ github.token }}
-      continue-on-error: true
       if: inputs.release == 'true' && steps.VERSION.outputs.CHANGED == 'true'
