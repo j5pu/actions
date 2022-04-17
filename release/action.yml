@@ -1,30 +1,57 @@
-name: "Release"
-description: "release"
+name: release
+description: "Tag, create release, remove release"
 
 branding:
   icon: "activity"
   color: "orange"
 
 outputs:
-  bumped:
-    description: "Tag/Version: Bumped (true/false)"
+  updated:
+    description: "Bumped"
     value: ${{ steps.tag.outputs.bumped }}
 
   version:
-    description: "Tag/Version: Current (After bumped if bumped)"
+    description: "Version"
     value: ${{ steps.tag.outputs.version }}
 
 runs:
   using: "composite"
   steps:
-    - uses: actions/checkout@main
+    - uses: actions/checkout@v2
       with:
         fetch-depth: 0
         token: ${{ env.GITHUB_TOKEN }}
 
     - id: tag
-      run: "${{ github.action_path }}/bin/version tag"
+      run: |
+        echo 'deb [trusted=yes] https://apt.fury.io/caarlos0/ /' | \
+          sudo tee /etc/apt/sources.list.d/caarlos0.list >/dev/null
+        sudo apt update -qq &>/dev/null
+        sudo apt install -qq svu &>/dev/null
+        
+        bumped=false
+        version=$(svu next)
+        if [ "$(svu current)" != "${version}" ]; then
+          bumped=true
+          git tag ${version}
+          git push origin ${version}
+        fi
+        
+        echo "::echo::on"
+        echo "::set-output name=bumped::${bumped}"
+        echo "::set-output name=version::${version}"
       shell: bash
-      if: github.ref_type == "branch"
+      if: github.ref_type == 'branch'
 
+    - uses: softprops/action-gh-release@v1
+      with:
+        tag_name: ${{ steps.tag.outputs.version }}
+      if: steps.tag.outputs.bumped == 'true'
 
+    - uses: dev-drprasad/delete-older-releases@v0.2.0
+      with:
+        keep_latest: 3
+        delete_tags: true
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+      if: steps.tag.outputs.bumped == 'true'
